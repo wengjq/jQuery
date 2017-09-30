@@ -11,6 +11,8 @@
  *
  * Date: 2013-07-03T13:48Z
  */
+
+// 模块化写法，不污染全局作用域
 (function( window, undefined ) {
 
 // Can't do this because several apps including ASP.NET trace
@@ -20,6 +22,7 @@
 //"use strict";
 var
 	// The deferred used on DOM ready
+	// 一个用在 DOM ready 上的回调函数处理变量
 	readyList,
 
 	// A central reference to the root jQuery(document)
@@ -27,6 +30,7 @@ var
 
 	// Support: IE<10
 	// For `typeof xmlNode.method` instead of `xmlNode.method !== undefined`
+	// 将 undefined 转换为字符串 "undefined"
 	core_strundefined = typeof undefined,
 
 	// Use the correct document accordingly with window argument (sandbox)
@@ -35,6 +39,9 @@ var
 	docElem = document.documentElement,
 
 	// Map over jQuery in case of overwrite
+	//当jQuery被页面加载后，当前页面有可能已经存在了jQuery和$这两个全局变量（比如，加载了其它的第三方库，其内部也定义了它俩）
+	//这就会导致已经存在的对象被覆盖（全局命名空间污染）
+	//为了解决这个问题，jQuery在内部先将已经存在的全局变量缓存起来，保存在私有变量_jQuery和_$中，供后续调用。
 	_jQuery = window.jQuery,
 
 	// Map over the $ in case of overwrite
@@ -381,14 +388,19 @@ jQuery.extend({
 	expando: "jQuery" + ( core_version + Math.random() ).replace( /\D/g, "" ),
 
 	noConflict: function( deep ) {
+		// 判断全局 $ 变量是否等于 jQuery 变量
+		// 如果等于，则重新还原全局变量 $ 为 jQuery 运行之前的变量（存储在内部变量 _$ 中）
 		if ( window.$ === jQuery ) {
 			window.$ = _$;
 		}
-
+		// 如果传入参数为 true， 并且全局变量 jQuery 等于内部 jQuery，则把全局 jQuery 还原，如何之前页面没有使用 jQuery，则为 undefined
 		if ( deep && window.jQuery === jQuery ) {
 			window.jQuery = _jQuery;
 		}
-
+		// 返回原来的 jQuery，有冲突时可以这样用，例子如下：
+		// var $ = 'a';
+    	// var $j = jQuery.noConflict();
+    	// console.log($j);
 		return jQuery;
 	},
 
