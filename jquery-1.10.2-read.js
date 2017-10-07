@@ -45,6 +45,7 @@ var
 	_jQuery = window.jQuery,
 
 	// Map over the $ in case of overwrite
+	// 同上述
 	_$ = window.$,
 
 	// [[Class]] -> type pairs
@@ -67,6 +68,11 @@ var
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
 		// The jQuery object is actually just the init constructor 'enhanced'
+
+		// jQuery 无 new 实例化
+		// 通过原型传递解决问题，把 jQuery 的原型传递给jQuery.prototype.init.prototype
+		// jQuery.fn.init.prototype = jQuery.fn;
+		// 所以通过这个方法生成的实例 this 所指向的 仍然是 jQuery.fn(jQuery.prototype)，所以能正确访问 jQuery 类原型上的属性与方法
 		return new jQuery.fn.init( selector, context, rootjQuery );
 	},
 
@@ -132,12 +138,15 @@ jQuery.fn = jQuery.prototype = {
 		var match, elem;
 
 		// HANDLE: $(""), $(null), $(undefined), $(false)
+		// 做保护
 		if ( !selector ) {
 			return this;
 		}
 
 		// Handle HTML strings
+		// 处理字符串
 		if ( typeof selector === "string" ) {
+			// 以  "<"开始，">"结尾，且长度大于等于3 
 			if ( selector.charAt(0) === "<" && selector.charAt( selector.length - 1 ) === ">" && selector.length >= 3 ) {
 				// Assume that strings that start and end with <> are HTML and skip the regex check
 				match = [ null, selector, null ];
