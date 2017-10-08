@@ -90,9 +90,9 @@ var
 	// Strict HTML recognition (#11290: must start with <)
 	// 用来检测参数 selector 是否是复杂的 HTML 代码（如“abc<div>”）或 #id，匹配结果存放在数组 match 中
 	// quickExpr = /^(?:pattern)/
-　　// pattern = p1|p2;
-　　// p1 = [^#<]*(<[\w\W]+>)[^>]*$;
-　　// p2 = #([\w\-]*)$; 
+　　// pattern = p1|p2
+　　// p1 = [^#<]*(<[\w\W]+>)[^>]*$
+　　// p2 = #([\w\-]*)$
 	// 1、(?:pattern)：表示匹配 pattern 但是不记住匹配项
 	// 2、p1：匹配复杂的 HTML
 	// 3、p2：匹配 #id
