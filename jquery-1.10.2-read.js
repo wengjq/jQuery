@@ -68,6 +68,11 @@ var
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
 		// The jQuery object is actually just the init constructor 'enhanced'
+
+		// jQuery 无 new 实例化
+		// 通过原型传递解决问题，把 jQuery 的原型传递给jQuery.prototype.init.prototype
+		// jQuery.fn.init.prototype = jQuery.fn;
+		// 所以通过这个方法生成的实例 this 所指向的 仍然是 jQuery.fn(jQuery.prototype)，所以能正确访问 jQuery 类原型上的属性与方法
 		return new jQuery.fn.init( selector, context, rootjQuery );
 	},
 
@@ -83,9 +88,18 @@ var
 	// A simple way to check for HTML strings
 	// Prioritize #id over <tag> to avoid XSS via location.hash (#9521)
 	// Strict HTML recognition (#11290: must start with <)
+	// 用来检测参数 selector 是否是复杂的 HTML 代码（如“abc<div>”）或 #id，匹配结果存放在数组 match 中
+	// quickExpr = /^(?:pattern)/
+　　// pattern = p1|p2
+　　// p1 = [^#<]*(<[\w\W]+>)[^>]*$
+　　// p2 = #([\w\-]*)$
+	// 1、(?:pattern)：表示匹配 pattern 但是不记住匹配项
+	// 2、p1：匹配复杂的 HTML
+	// 3、p2：匹配 #id
 	rquickExpr = /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/,
 
 	// Match a standalone tag
+	// 这个正则匹配的是 纯HTML标签,不带任何属性
 	rsingleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/,
 
 	// JSON RegExp
@@ -133,28 +147,35 @@ jQuery.fn = jQuery.prototype = {
 		var match, elem;
 
 		// HANDLE: $(""), $(null), $(undefined), $(false)
+		// 做保护
 		if ( !selector ) {
 			return this;
 		}
 
 		// Handle HTML strings
+		// 处理字符串
 		if ( typeof selector === "string" ) {
+			// 匹配以 "<"开始，">"结尾，且长度大于等于3 
 			if ( selector.charAt(0) === "<" && selector.charAt( selector.length - 1 ) === ">" && selector.length >= 3 ) {
 				// Assume that strings that start and end with <> are HTML and skip the regex check
 				match = [ null, selector, null ];
 
 			} else {
+				// 匹配复杂的 HTML 代码（如“<div></div>abc”）或 #id
 				match = rquickExpr.exec( selector );
 			}
 
 			// Match html or make sure no context is specified for #id
+			// 匹配的 html 或确保没有上下文指定为# id
 			if ( match && (match[1] || !context) ) {
 
 				// HANDLE: $(html) -> $(array)
+				// 如果是 html 标签
 				if ( match[1] ) {
 					context = context instanceof jQuery ? context[0] : context;
 
 					// scripts is true for back-compat
+					// 将传入的 html 字符串转换成节点数组并传入 this 中
 					jQuery.merge( this, jQuery.parseHTML(
 						match[1],
 						context && context.nodeType ? context.ownerDocument || context : document,
@@ -162,13 +183,19 @@ jQuery.fn = jQuery.prototype = {
 					) );
 
 					// HANDLE: $(html, props)
+					// 传入的selector 是纯 HTML 标签，且 context 不为空
+					// var jqHTML = $('<div></div>', {'class': 'css-class', 'data-name': 'data-val', 'click': function() { alert(666) } });
+					// rsingleTag匹配无任何属性的html标签，假如设置了高度是不会进入该分支的，例：$('<div style="height: 20px;"></div>', {'class': 'css-class', 'data-name': 'data-val', 'click': function() { alert(666) } });
+					// 纯粹的对象指的是 通过 "{}" 或者 "new Object" 创建的
 					if ( rsingleTag.test( match[1] ) && jQuery.isPlainObject( context ) ) {
 						for ( match in context ) {
 							// Properties of context are called as methods if possible
+							// 若是事件函数，则调用this中相应的添加事件函数的方法，将函数绑定
 							if ( jQuery.isFunction( this[ match ] ) ) {
 								this[ match ]( context[ match ] );
 
 							// ...and otherwise set as attributes
+							// 设置属性值
 							} else {
 								this.attr( match, context[ match ] );
 							}
@@ -178,19 +205,25 @@ jQuery.fn = jQuery.prototype = {
 					return this;
 
 				// HANDLE: $(#id)
+				// 处理id -> $('#id')
 				} else {
 					elem = document.getElementById( match[2] );
 
 					// Check parentNode to catch when Blackberry 4.6 returns
 					// nodes that are no longer in the document #6963
+					// 判断是否有parentnode
+                    // 因为在某些浏览器下getElementById会返回已删除的节点
 					if ( elem && elem.parentNode ) {
 						// Handle the case where IE and Opera return items
 						// by name instead of ID
+						// IE和Opera下面的特殊情况
+                        // 会返回name的情况
 						if ( elem.id !== match[2] ) {
 							return rootjQuery.find( selector );
 						}
 
 						// Otherwise, we inject the element directly into the jQuery object
+						// 正常的浏览器下就直接放入到this，生成类数组
 						this.length = 1;
 						this[0] = elem;
 					}
@@ -201,16 +234,28 @@ jQuery.fn = jQuery.prototype = {
 				}
 
 			// HANDLE: $(expr, $(...))
+			// 如果第一个参数是一个.className ，第二参数为一个 jquery 对象
+			// rootjQuery 相当于 $(document)
+			// 下面的 return 相当于 $(context).find( selector )
+			// (如果 context 为空) jQuery(document).find( selector )
+			// var a = $("#tt");
+    		// var b = $('.hh', a);
+    		// 上面的例子如果存在另外一个 jquery 对象，则 context 为 a,否则为 document
 			} else if ( !context || context.jquery ) {
+				// 调用 Sizzle 引擎进行更复杂的选择器查找
 				return ( context || rootjQuery ).find( selector );
 
 			// HANDLE: $(expr, context)
 			// (which is just equivalent to: $(context).find(expr)
+			// 如果第一个参数是.className，第二个参数是一个上下文对象
+			// this.constructor 即是 jQuery
+			// this.constructor( context ).find( selector ) -> jQuery(context).find(selector)
 			} else {
 				return this.constructor( context ).find( selector );
 			}
 
 		// HANDLE: $(DOMElement)
+		// 处理DOMElement
 		} else if ( selector.nodeType ) {
 			this.context = this[0] = selector;
 			this.length = 1;
@@ -218,10 +263,13 @@ jQuery.fn = jQuery.prototype = {
 
 		// HANDLE: $(function)
 		// Shortcut for document ready
+		// 处理 $(function(){})
 		} else if ( jQuery.isFunction( selector ) ) {
 			return rootjQuery.ready( selector );
 		}
 
+		// 匹配选择器里嵌套了一个选择器
+		// $($('.a')) 相当于 $('.a')
 		if ( selector.selector !== undefined ) {
 			this.selector = selector.selector;
 			this.context = selector.context;
