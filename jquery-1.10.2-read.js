@@ -45,6 +45,7 @@ var
 	_jQuery = window.jQuery,
 
 	// Map over the $ in case of overwrite
+	// 同上述
 	_$ = window.$,
 
 	// [[Class]] -> type pairs
