@@ -185,7 +185,7 @@ jQuery.fn = jQuery.prototype = {
 					// HANDLE: $(html, props)
 					// 传入的selector 是纯 HTML 标签，且 context 不为空
 					// var jqHTML = $('<div></div>', {'class': 'css-class', 'data-name': 'data-val', 'click': function() { alert(666) } });
-					// rsingleTag匹配无任何属性的html标签，假如设置了高度是不会进入该分支的，例：$('<div style="height: 20px;"></div>', {'class': 'css-class', 'data-name': 'data-val', 'click': function() { alert(666) } });
+					// rsingleTag匹配无任何属性的 html 标签，假如设置了高度是不会进入该分支的，例：$('<div style="height: 20px;"></div>', {'class': 'css-class', 'data-name': 'data-val', 'click': function() { alert(666) } });
 					// 纯粹的对象指的是 通过 "{}" 或者 "new Object" 创建的
 					if ( rsingleTag.test( match[1] ) && jQuery.isPlainObject( context ) ) {
 						for ( match in context ) {
@@ -282,14 +282,20 @@ jQuery.fn = jQuery.prototype = {
 	selector: "",
 
 	// The default length of a jQuery object is 0
+	// 有了这个属性该对象就是类数组了
 	length: 0,
 
+	// 相当于 Array.prototype.slice.call(this)
+	// 转成数组类型
 	toArray: function() {
 		return core_slice.call( this );
 	},
 
 	// Get the Nth element in the matched element set OR
 	// Get the whole matched element set as a clean array
+	// 如果 num 不为 null ，将返回索引为 num 的元素
+	// 否则，返回索引当前的 jquery 对象（已转成数组）
+	// 当 num 为负数的时候，相当于从数组尾巴倒数索引
 	get: function( num ) {
 		return num == null ?
 
@@ -302,9 +308,11 @@ jQuery.fn = jQuery.prototype = {
 
 	// Take an array of elements and push it onto the stack
 	// (returning the new matched element set)
+	// pushStack() 方法通过改变一个 jQuery 对象的 prevObject 属性来跟踪链式调用中前一个方法返回的 DOM 结果集合
 	pushStack: function( elems ) {
 
 		// Build a new jQuery matched element set
+		// 返回的对象的 prevObject 属性指向上一个对象，所以可以通过这个属性找到栈的上一个对象
 		var ret = jQuery.merge( this.constructor(), elems );
 
 		// Add the old object onto the stack (as a reference)
@@ -312,6 +320,7 @@ jQuery.fn = jQuery.prototype = {
 		ret.context = this.context;
 
 		// Return the newly-formed element set
+		// 返回一个 jQuery 对象
 		return ret;
 	},
 
@@ -324,11 +333,13 @@ jQuery.fn = jQuery.prototype = {
 
 	ready: function( fn ) {
 		// Add the callback
+		// 调用异步队列的 done 方法，把 fn 回调加入成功队列里边去
 		jQuery.ready.promise().done( fn );
 
+		// 支持 jQuery 的链式操作
 		return this;
 	},
-
+	// 构建一个新的 jQuery 对象数组，并可以回溯回上一个对象
 	slice: function() {
 		return this.pushStack( core_slice.apply( this, arguments ) );
 	},
@@ -340,7 +351,8 @@ jQuery.fn = jQuery.prototype = {
 	last: function() {
 		return this.eq( -1 );
 	},
-
+	// 取当前 jQuery 对象的第 i 个
+	// 同样加入了栈中，可以回溯回上一个对象
 	eq: function( i ) {
 		var len = this.length,
 			j = +i + ( i < 0 ? len : 0 );
@@ -352,22 +364,28 @@ jQuery.fn = jQuery.prototype = {
 			return callback.call( elem, i, elem );
 		}));
 	},
-
+	// 返回上一步操作的 jQuery 对象集合
 	end: function() {
 		return this.prevObject || this.constructor(null);
 	},
 
 	// For internal use only.
 	// Behaves like an Array's method, not like a jQuery method.
+	// 仅在内部使用
 	push: core_push,
 	sort: [].sort,
 	splice: [].splice
 };
 
 // Give the init function the jQuery prototype for later instantiation
+// jquery无 new 构造的关键
+// 所以 jQuery.fn.init 生成的实例 this 所指向的 仍然是 jQuery.fn(jQuery.prototype)，所以能正确访问 jQuery 类原型上的属性与方法
 jQuery.fn.init.prototype = jQuery.fn;
 
+// 给 jQuery 对象和 jQuery 原型对象都添加了extend扩展方法
 jQuery.extend = jQuery.fn.extend = function() {
+	// options 是一个缓存变量，用来缓存arguments[i]，name 是用来接收将要被扩展对象的 key ，src 改变之前 target 对象上每个 key 对应的 value
+  	// copy 传入对象上每个key对应的 value ，copyIsArray 判定copy是否为一个数组，clone 深拷贝中用来临时存对象或数组的 src
 	var src, copyIsArray, copy, name, options, clone,
 		target = arguments[0] || {},
 		i = 1,
@@ -375,19 +393,23 @@ jQuery.extend = jQuery.fn.extend = function() {
 		deep = false;
 
 	// Handle a deep copy situation
+	// 处理深拷贝的情况
 	if ( typeof target === "boolean" ) {
 		deep = target;
 		target = arguments[1] || {};
 		// skip the boolean and the target
+		//跳过布尔值和目标
 		i = 2;
 	}
 
 	// Handle case when target is a string or something (possible in deep copy)
+	// 控制当target不是 object 或者 function 的情况
 	if ( typeof target !== "object" && !jQuery.isFunction(target) ) {
 		target = {};
 	}
 
 	// extend jQuery itself if only one argument is passed
+	// 当参数列表长度等于i的时候，扩展jQuery对象自身，即 jQuery 静态方法
 	if ( length === i ) {
 		target = this;
 		--i;
@@ -402,6 +424,7 @@ jQuery.extend = jQuery.fn.extend = function() {
 				copy = options[ name ];
 
 				// Prevent never-ending loop
+				// 防止永无止境的循环，这里举个例子，如var i = {};i.a = i;$.extend(true, {}, i);如果没有这个判断变成死循环了
 				if ( target === copy ) {
 					continue;
 				}
@@ -410,17 +433,21 @@ jQuery.extend = jQuery.fn.extend = function() {
 				if ( deep && copy && ( jQuery.isPlainObject(copy) || (copyIsArray = jQuery.isArray(copy)) ) ) {
 					if ( copyIsArray ) {
 						copyIsArray = false;
+						// 如果src存在且是数组的话就让clone副本等于src否则等于空数组
 						clone = src && jQuery.isArray(src) ? src : [];
 
 					} else {
+						// 如果src存在且是对象的话就让clone副本等于src否则等于空数组
 						clone = src && jQuery.isPlainObject(src) ? src : {};
 					}
 
 					// Never move original objects, clone them
+					// 递归拷贝
 					target[ name ] = jQuery.extend( deep, clone, copy );
 
 				// Don't bring in undefined values
 				} else if ( copy !== undefined ) {
+					// 若原对象存在name属性，则直接覆盖掉；若不存在，则创建新的属性
 					target[ name ] = copy;
 				}
 			}
@@ -428,12 +455,16 @@ jQuery.extend = jQuery.fn.extend = function() {
 	}
 
 	// Return the modified object
+	// 返回修改的对象
 	return target;
 };
-
+// 一些工具函数，区分 jQuery.extend(object) 和 jQuery.fn.extend(object) 区别
+// jQuery.extend(object) 为扩展 jQuery 类本身，为类添加新的方法。
+// jQuery.fn.extend(object) 给 jQuery 原型对象添加方法
 jQuery.extend({
 	// Unique for each copy of jQuery on the page
 	// Non-digits removed to match rinlinejQuery
+	// 产生jQuery随机数
 	expando: "jQuery" + ( core_version + Math.random() ).replace( /\D/g, "" ),
 
 	noConflict: function( deep ) {
