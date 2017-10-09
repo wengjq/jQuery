@@ -485,13 +485,22 @@ jQuery.extend({
 	},
 
 	// Is the DOM ready to be used? Set to true once it occurs.
+	// DOM 是否已经加载完成
 	isReady: false,
 
 	// A counter to track how many items to wait for before
 	// the ready event fires. See #6781
+	// 事件计数
 	readyWait: 1,
 
 	// Hold (or release) the ready event
+	// 方法允许调用者延迟 jQuery 的 ready 事件
+	// $.holdReady(true);  
+ 	// $.getScript("a.js", function() { 
+ 	//  	$.holdReady(false);
+ 	// }); 
+	// $(function() {console.log(2)});
+	// 这时候就会先打印1(a.js中打印1)，后打印2
 	holdReady: function( hold ) {
 		if ( hold ) {
 			jQuery.readyWait++;
@@ -504,27 +513,41 @@ jQuery.extend({
 	ready: function( wait ) {
 
 		// Abort if there are pending holds or we're already ready
+		// 如果 readyWait 不是0，或者isReady是false，那么什么也不做，继续等待!
 		if ( wait === true ? --jQuery.readyWait : jQuery.isReady ) {
 			return;
 		}
 
 		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+		// 在IE中需要判断body是否存在，不存在那么继续等待
 		if ( !document.body ) {
+			// 如果 body 还不存在 ，DOMContentLoaded 未完成，此时
+			// 将 jQuery.ready 放入定时器 setTimeout 中
+			// 不带时间参数的 setTimeout(a) 相当于 setTimeout(a, 0)
+			// setTimeout(jQuery.ready) 会等到重绘完成才执行代码，也就是 DOMContentLoaded 之后才执行 jQuery.ready
+			// 所以这里有个小技巧：在 setTimeout 中触发的函数, 一定会在 DOM 准备完毕后触发
 			return setTimeout( jQuery.ready );
 		}
 
 		// Remember that the DOM is ready
+		// 记录 DOM ready 已经完成
 		jQuery.isReady = true;
 
 		// If a normal DOM Ready event fired, decrement, and wait if need be
+		// 一直等到readyWait为 0 
 		if ( wait !== true && --jQuery.readyWait > 0 ) {
 			return;
 		}
 
 		// If there are functions bound, to execute
+		// 第一个参数是指向context所以ready中第一个参数是document对象，第二个jQuery就是参数也就是给ready函数传递的参数
 		readyList.resolveWith( document, [ jQuery ] );
 
 		// Trigger any bound ready events
+		// 最后jQuery还可以触发自己的ready事件
+		// $(document).on('ready', fn2);
+		// $(document).ready(fn1);
+		// 这里的fn1会先执行，自己的ready事件绑定的fn2回调后执行
 		if ( jQuery.fn.trigger ) {
 			jQuery( document ).trigger("ready").off("ready");
 		}
