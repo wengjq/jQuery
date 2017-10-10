@@ -26,6 +26,7 @@ var
 	readyList,
 
 	// A central reference to the root jQuery(document)
+	// jQuery(document)
 	rootjQuery,
 
 	// Support: IE<10
@@ -34,6 +35,7 @@ var
 	core_strundefined = typeof undefined,
 
 	// Use the correct document accordingly with window argument (sandbox)
+	// 相应地使用正确的文档与窗口参数，避免被修改
 	location = window.location,
 	document = window.document,
 	docElem = document.documentElement,
@@ -556,19 +558,20 @@ jQuery.extend({
 	// See test/unit/core.js for details concerning isFunction.
 	// Since version 1.3, DOM methods and functions like alert
 	// aren't supported. They return false on IE (#2968).
+	// 判断传入对象是否为 function
 	isFunction: function( obj ) {
 		return jQuery.type(obj) === "function";
 	},
-
+	// 判断传入对象是否为数组
 	isArray: Array.isArray || function( obj ) {
 		return jQuery.type(obj) === "array";
 	},
-
+	// 判断传入对象是否为 window 对象
 	isWindow: function( obj ) {
 		/* jshint eqeqeq: false */
 		return obj != null && obj == obj.window;
 	},
-
+	// 判断传入参数是否为数字
 	isNumeric: function( obj ) {
 		return !isNaN( parseFloat(obj) ) && isFinite( obj );
 	},
