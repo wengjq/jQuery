@@ -112,6 +112,7 @@ var
 
 	// Matches dashed string for camelizing
 	rmsPrefix = /^-ms-/,
+	// 匹配连字符 ‘-’ 和其后的第一个字母或数字，如果是字母，则替换为大写，如果是数字，则保留数字
 	rdashAlpha = /-([\da-z])/gi,
 
 	// Used by jQuery.camelCase as callback to replace()
@@ -188,7 +189,7 @@ jQuery.fn = jQuery.prototype = {
 					// 传入的selector 是纯 HTML 标签，且 context 不为空
 					// var jqHTML = $('<div></div>', {'class': 'css-class', 'data-name': 'data-val', 'click': function() { alert(666) } });
 					// rsingleTag匹配无任何属性的 html 标签，假如设置了高度是不会进入该分支的，例：$('<div style="height: 20px;"></div>', {'class': 'css-class', 'data-name': 'data-val', 'click': function() { alert(666) } });
-					// 纯粹的对象指的是 通过 "{}" 或者 "new Object" 创建的
+					// 纯粹的对象指的是 原型链上直接继承 Object.prototype 的对象
 					if ( rsingleTag.test( match[1] ) && jQuery.isPlainObject( context ) ) {
 						for ( match in context ) {
 							// Properties of context are called as methods if possible
@@ -573,30 +574,37 @@ jQuery.extend({
 	},
 	// 判断传入参数是否为数字
 	isNumeric: function( obj ) {
+		//先判断是不是NaN，再判断有限还是无限
 		return !isNaN( parseFloat(obj) ) && isFinite( obj );
 	},
-
+	// 确定 js 对象的类型
 	type: function( obj ) {
+		// 如果传入的为 null --> $.type(null)
+		// "null"
 		if ( obj == null ) {
 			return String( obj );
 		}
+		// class2type 里的各种类型已经存好了
 		return typeof obj === "object" || typeof obj === "function" ?
 			class2type[ core_toString.call(obj) ] || "object" :
 			typeof obj;
 	},
-
+	// 判断对象是否是纯粹的对象
+	// 原型链上直接继承 Object.prototype 的对象
 	isPlainObject: function( obj ) {
 		var key;
 
 		// Must be an Object.
 		// Because of IE, we also have to check the presence of the constructor property.
 		// Make sure that DOM nodes and window objects don't pass through, as well
+		// 排除非object类型，然后是DOM对象，window对象
 		if ( !obj || jQuery.type(obj) !== "object" || obj.nodeType || jQuery.isWindow( obj ) ) {
 			return false;
 		}
 
 		try {
 			// Not own constructor property must be Object
+			// obj.constructor.prototype 可以访问到当前对象实例的原型，是否拥有isPrototypeOf方法，没有则被排除
 			if ( obj.constructor &&
 				!core_hasOwn.call(obj, "constructor") &&
 				!core_hasOwn.call(obj.constructor.prototype, "isPrototypeOf") ) {
@@ -621,7 +629,7 @@ jQuery.extend({
 
 		return key === undefined || core_hasOwn.call( obj, key );
 	},
-
+	// 检查对象是否为空（不包含任何属性）
 	isEmptyObject: function( obj ) {
 		var name;
 		for ( name in obj ) {
@@ -629,7 +637,7 @@ jQuery.extend({
 		}
 		return true;
 	},
-
+	// 为 JavaScript 的 "error" 事件绑定一个处理函数
 	error: function( msg ) {
 		throw new Error( msg );
 	},
@@ -637,31 +645,54 @@ jQuery.extend({
 	// data: string of html
 	// context (optional): If specified, the fragment will be created in this context, defaults to document
 	// keepScripts (optional): If true, will include scripts passed in the html string
+	// 将字符串转化为节点数组
+	// data -- 用来解析的HTML字符串
+	// context -- DOM元素的上下文，在这个上下文中将创建的HTML片段
+	// keepScripts  -- 一个布尔值，表明是否在传递的HTML字符串中包含脚本
 	parseHTML: function( data, context, keepScripts ) {
 		if ( !data || typeof data !== "string" ) {
 			return null;
 		}
+		// 只有两个参数的时候，第二个就是是否保存script标签，这时候相当于 function(data, keepScripts)  
 		if ( typeof context === "boolean" ) {
 			keepScripts = context;
 			context = false;
 		}
+		// 如果只有两个参数那么context就是document对象
 		context = context || document;
 
+		// rsingleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/
+		// 上面这个正则匹配的是 纯HTML标签,不带任何属性 ，如 '<html></html>' 或者 '<div/>'
+		// rsingleTag.test('<html></html>') --> true
+		// rsingleTag.test('<img/>') --> true
+		// rsingleTag.test('<html>666</html>') --> false
+		// rsingleTag.test('<div class="foo"></div>') --> false
 		var parsed = rsingleTag.exec( data ),
 			scripts = !keepScripts && [];
 
+		// 这里相当于
+		// if (!keepScripts) {
+		// 	 scripts = [];
+		// } else {
+		// 	 scripts = !keepScripts;
+		// }	
+
 		// Single tag
+		// 如果是单个标签就调用相应的createElement方法，默认上下文是document
 		if ( parsed ) {
 			return [ context.createElement( parsed[1] ) ];
 		}
-
+		// 如果不是单个标签就调用buildFragment方法，把html字符串传入，同时上下文也传入，第三个参数就是scripts
+	    // 如果paseHTML的第三个参数是false，那么这里的scripts就是一个数组，传递到buildFragment中会把所有的script标签放在里面  
+	    // 所以就要收到移除
 		parsed = jQuery.buildFragment( [ data ], context, scripts );
 		if ( scripts ) {
 			jQuery( scripts ).remove();
 		}
+		// buildFragment返回的是文档碎片，所以要变成数组，调用merge方法
 		return jQuery.merge( [], parsed.childNodes );
 	},
-
+	// 解析 JSON 字符串，转为与之对应的JavaScript对象
 	parseJSON: function( data ) {
 		// Attempt to parse using the native JSON parser first
 		if ( window.JSON && window.JSON.parse ) {
@@ -721,6 +752,8 @@ jQuery.extend({
 	// Evaluates a script in a global context
 	// Workarounds based on findings by Jim Driscoll
 	// http://weblogs.java.net/blog/driscoll/archive/2009/09/08/eval-javascript-global-context
+	// 用于全局性地执行一段JavaScript代码
+	// 该方法跟eval方法相比有一个作用域的范围差异即始终处于全局作用域下面
 	globalEval: function( data ) {
 		if ( data && jQuery.trim( data ) ) {
 			// We use execScript on Internet Explorer
@@ -735,14 +768,22 @@ jQuery.extend({
 	// Convert dashed to camelCase; used by the css and data modules
 	// Microsoft forgot to hump their vendor prefix (#9572)
 	camelCase: function( string ) {
+		// 正则rmsPrefix用于匹配字符串中前缀“-ms-”，匹配部分会被替换为“ms-”。
+		// 这么做是因为在IE中，连字符式的样式名前缀“-ms-”对应小写的“ms”，而不是驼峰式的“Ms”
+		// 例如，“-ms-transform” 对应 “msTransform” 而不是“MsTransform”。
+		// 在IE以外的浏览器中，连字符式的样式名则可以正确地转换为驼峰式，例如，“-moz-transform” 对应 “MozTransform”
 		return string.replace( rmsPrefix, "ms-" ).replace( rdashAlpha, fcamelCase );
 	},
-
+	// 获取 DOM 节点的节点名字或者判断其名字跟传入参数是否匹配
 	nodeName: function( elem, name ) {
 		return elem.nodeName && elem.nodeName.toLowerCase() === name.toLowerCase();
 	},
 
 	// args is for internal usage only
+	// 遍历一个数组或者对象
+	// obj 是需要遍历的数组或者对象
+	// callback 是处理数组/对象的每个元素的回调函数，它的返回值实际会中断循环的过程
+	// args 是额外的参数数组
 	each: function( obj, callback, args ) {
 		var value,
 			i = 0,
