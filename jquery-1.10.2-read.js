@@ -56,6 +56,7 @@ var
 	// List of deleted data cache ids, so we can reuse them
 	core_deletedIds = [],
 
+	// 定义当前版本
 	core_version = "1.10.2",
 
 	// Save a reference to some core methods
@@ -65,6 +66,9 @@ var
 	core_indexOf = core_deletedIds.indexOf,
 	core_toString = class2type.toString,
 	core_hasOwn = class2type.hasOwnProperty,
+
+	// core_version这个变量事先存储好了 String.trim 方法的入口
+	// 节省查找内存地址时间，提高效率
 	core_trim = core_version.trim,
 
 	// Define a local copy of jQuery
@@ -834,7 +838,13 @@ jQuery.extend({
 	},
 
 	// Use native String.trim function wherever possible
+	// 去除字符串两端空格
+	// core_trim = core_version.trim,
+	// rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g
+	// \uFEFF 是 utf8 的字节序标记
+	// \xA0 是全角空格
 	trim: core_trim && !core_trim.call("\uFEFF\xA0") ?
+		// 如何支持原生的String的trim方法并且浏览器能解析全角空白
 		function( text ) {
 			return text == null ?
 				"" :
@@ -842,6 +852,7 @@ jQuery.extend({
 		} :
 
 		// Otherwise use our own trimming functionality
+		// 自己实现
 		function( text ) {
 			return text == null ?
 				"" :
