@@ -860,27 +860,35 @@ jQuery.extend({
 		},
 
 	// results is for internal usage only
+	// 将类数组对象转换为数组对象
 	makeArray: function( arr, results ) {
 		var ret = results || [];
 
 		if ( arr != null ) {
+			// 如果 arr 是一个类数组对象，调用 merge 合到返回值
 			if ( isArraylike( Object(arr) ) ) {
 				jQuery.merge( ret,
 					typeof arr === "string" ?
 					[ arr ] : arr
 				);
 			} else {
+				// 如果不是数组，则将其放到返回数组末尾
+				// 等同于 ret.push(arr);
 				core_push.call( ret, arr );
 			}
 		}
 
 		return ret;
 	},
-
+	// 在数组中查找指定值并返回它的索引（如果没有找到，则返回-1）
+	// elem 规定需检索的值。
+	// arr 数组
+	// i 可选的整数参数。规定在数组中开始检索的位置。它的合法取值是 0 到 arr.length - 1。如省略该参数，则将从数组首元素开始检索。
 	inArray: function( elem, arr, i ) {
 		var len;
 
 		if ( arr ) {
+			// 如果支持原生的 indexOf 方法，直接调用
 			if ( core_indexOf ) {
 				return core_indexOf.call( arr, elem, i );
 			}
@@ -890,6 +898,11 @@ jQuery.extend({
 
 			for ( ; i < len; i++ ) {
 				// Skip accessing in sparse arrays
+				// jQuery这里的(i in arr)判断是为了跳过稀疏数组中的元素
+				// 例如 var a = []; a[1] = 1;
+				// 0 in a => false
+				// 例如 var b = [undefined, 1];
+				// 0 in b => true			
 				if ( i in arr && arr[ i ] === elem ) {
 					return i;
 				}
@@ -898,17 +911,19 @@ jQuery.extend({
 
 		return -1;
 	},
-
+	// merge的两个参数必须为数组，作用就是修改第一个数组，使得它末尾加上第二个数组
+	// second可以是一个类数组对象
 	merge: function( first, second ) {
 		var l = second.length,
 			i = first.length,
 			j = 0;
-
+		// 如果second是数组	
 		if ( typeof l === "number" ) {
 			for ( ; j < l; j++ ) {
 				first[ i++ ] = second[ j ];
 			}
 		} else {
+			// 如果second类数组
 			while ( second[j] !== undefined ) {
 				first[ i++ ] = second[ j++ ];
 			}
@@ -924,11 +939,15 @@ jQuery.extend({
 			ret = [],
 			i = 0,
 			length = elems.length;
+		// !! 强制类型转换为 boolean 值
 		inv = !!inv;
 
 		// Go through the array, only saving the items
 		// that pass the validator function
 		for ( ; i < length; i++ ) {
+			// !! 强制类型转换为 boolean 值
+			// 注意这里的 callback 参数是先 value, 后 key
+			// 这样设计的原因是往往过滤器只需使用value，这样就可以忽略第二个参数了
 			retVal = !!callback( elems[ i ], i );
 			if ( inv !== retVal ) {
 				ret.push( elems[ i ] );
@@ -939,6 +958,7 @@ jQuery.extend({
 	},
 
 	// arg is for internal usage only
+	// 把数组每一项经过callback处理后的值依次加入到返回数组中
 	map: function( elems, callback, arg ) {
 		var value,
 			i = 0,
@@ -947,6 +967,7 @@ jQuery.extend({
 			ret = [];
 
 		// Go through the array, translating each of the items to their
+		// 如果传入的 elems 是数组或者类数组
 		if ( isArray ) {
 			for ( ; i < length; i++ ) {
 				value = callback( elems[ i ], i, arg );
@@ -957,6 +978,7 @@ jQuery.extend({
 			}
 
 		// Go through every key on the object,
+		// 如果传入的 elems 是对象
 		} else {
 			for ( i in elems ) {
 				value = callback( elems[ i ], i, arg );
@@ -968,14 +990,27 @@ jQuery.extend({
 		}
 
 		// Flatten any nested arrays
+		// 这里相当于 var a = [];a.concat(ret)
 		return core_concat.apply( [], ret );
 	},
 
 	// A global GUID counter for objects
+	// 一个全局的计数器
 	guid: 1,
 
 	// Bind a function to a context, optionally partially applying any
 	// arguments.
+	// fn -- 将要改变上下文语境的函数
+	// context -- 函数的上下文语境( this )会被设置成这个 object 对象
+	// 例子 var foo = {  
+    //  		name:"wjq",  
+    //  		showEvent: function() {  
+    //    			console.log(arguments.length);  
+    //  		}  
+    //		}  
+    //		var to = $.proxy(foo.showEvent, foo, 1, 2);  
+    // 由于在返回proxy函数之前首先把多余的1，2参数保存下来，这样就形成了一个闭包，下次调用proxy时候可以访问
+    //		to(3, 4); => 打印4
 	proxy: function( fn, context ) {
 		var args, proxy, tmp;
 
@@ -987,11 +1022,13 @@ jQuery.extend({
 
 		// Quick check to determine if target is callable, in the spec
 		// this throws a TypeError, but we will just return undefined.
+		// 如果第一个参数不是函数，那么直接返回undefined
 		if ( !jQuery.isFunction( fn ) ) {
 			return undefined;
 		}
 
 		// Simulated bind
+		// 获取传递进来的第三个以及以后的参数
 		args = core_slice.call( arguments, 2 );
 		proxy = function() {
 			return fn.apply( context || this, args.concat( core_slice.call( arguments ) ) );
@@ -999,7 +1036,7 @@ jQuery.extend({
 
 		// Set the guid of unique handler to the same of original handler, so it can be removed
 		proxy.guid = fn.guid = fn.guid || jQuery.guid++;
-
+		// 返回一个闭包
 		return proxy;
 	},
 
@@ -1055,7 +1092,7 @@ jQuery.extend({
 				fn.call( elems ) :
 				length ? fn( elems[0], key ) : emptyGet;
 	},
-
+	// 获取当前时间
 	now: function() {
 		return ( new Date() ).getTime();
 	},
@@ -1063,6 +1100,7 @@ jQuery.extend({
 	// A method for quickly swapping in/out CSS properties to get correct calculations.
 	// Note: this method belongs to the css module but it's needed here for the support module.
 	// If support gets modularized, this method should be moved back to the css module.
+	// 此方法是属于 css 模块
 	swap: function( elem, options, callback, args ) {
 		var ret, name,
 			old = {};
