@@ -1121,10 +1121,10 @@ jQuery.extend({
 		return ret;
 	}
 });
-
+// $.ready()
 jQuery.ready.promise = function( obj ) {
 	if ( !readyList ) {
-
+		// 创建一个延时对象，并将文档准备好后的处理事件添加到该延时对象成功事件列表上。
 		readyList = jQuery.Deferred();
 
 		// Catch cases where $(document).ready() is called after the browser event has already occurred.
@@ -1132,26 +1132,34 @@ jQuery.ready.promise = function( obj ) {
 		// discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
 		if ( document.readyState === "complete" ) {
 			// Handle it asynchronously to allow scripts the opportunity to delay ready
+			// setTimeout : 在setTimeout中触发的函数, 一定会在DOM准备完毕后触发.(即是 DOMContentLoaded)
 			setTimeout( jQuery.ready );
 
 		// Standards-based browsers support DOMContentLoaded
 		} else if ( document.addEventListener ) {
+			// 标准浏览器支持DOMContentLoaded事件
 			// Use the handy event callback
+			// 绑定DOMContentLoaded事件和响应函数，响应函数会解决延时
 			document.addEventListener( "DOMContentLoaded", completed, false );
 
 			// A fallback to window.onload, that will always work
+			// 回退到window.onload事件绑定，所有的浏览器都支持
 			window.addEventListener( "load", completed, false );
 
 		// If IE event model is used
+		// 如果是 IE 浏览器（6、7、8）
 		} else {
 			// Ensure firing before onload, maybe late but safe also for iframes
+			// 确保在onload之前执行延时，可能时间比较迟，但是对于iframes来说比较安全
 			document.attachEvent( "onreadystatechange", completed );
 
 			// A fallback to window.onload, that will always work
+			// 回退到window.onload事件绑定，所有的浏览器都支持
 			window.attachEvent( "onload", completed );
 
 			// If IE and not a frame
 			// continually check to see if the document is ready
+			// 如果是 IE 且不是在 frame 中
 			var top = false;
 
 			try {
@@ -1165,6 +1173,7 @@ jQuery.ready.promise = function( obj ) {
 						try {
 							// Use the trick by Diego Perini
 							// http://javascript.nwbox.com/IEContentLoaded/
+							// 对于 IE 在非 iframe 内时，只有不断地通过能否执行 doScroll 判断 DOM 是否加载完毕
 							top.doScroll("left");
 						} catch(e) {
 							return setTimeout( doScrollCheck, 50 );
@@ -1184,10 +1193,12 @@ jQuery.ready.promise = function( obj ) {
 };
 
 // Populate the class2type map
+// 运用了钩子机制，判断类型前，将常见类型打表，先存于一个 Hash 表 class2type 里边
 jQuery.each("Boolean Number String Function Array Date RegExp Object Error".split(" "), function(i, name) {
 	class2type[ "[object " + name + "]" ] = name.toLowerCase();
 });
 
+// 返回对象是否是类数组对象
 function isArraylike( obj ) {
 	var length = obj.length,
 		type = jQuery.type( obj );
@@ -1206,6 +1217,7 @@ function isArraylike( obj ) {
 }
 
 // All jQuery objects should point back to these
+// 所有jQuery 对象最后的指向应该都是回到 jQuery(document)
 rootjQuery = jQuery(document);
 /*!
  * Sizzle CSS Selector Engine v1.10.2
@@ -1217,6 +1229,7 @@ rootjQuery = jQuery(document);
  *
  * Date: 2013-07-03
  */
+ // Sizzle 引擎
 (function( window, undefined ) {
 
 var i,
