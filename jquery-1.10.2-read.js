@@ -1260,6 +1260,8 @@ var i,
 	classCache = createCache(),
 	tokenCache = createCache(),
 	compilerCache = createCache(),
+
+	// 刚检查完的两个元素是否重复
 	hasDuplicate = false,
 	sortOrder = function( a, b ) {
 		if ( a === b ) {
