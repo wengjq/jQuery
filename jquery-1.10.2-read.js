@@ -1254,6 +1254,7 @@ var i,
 
 	// Instance-specific data
 	expando = "sizzle" + -(new Date()),
+	// 保存复用的 document 变量，提高效率
 	preferredDoc = window.document,
 	dirruns = 0,
 	done = 0,
@@ -1272,7 +1273,9 @@ var i,
 	},
 
 	// General-purpose constants
+	// 将 undefined 类型转换为字符串，用于判断
 	strundefined = typeof undefined,
+	// -Math.pow(2, 31)
 	MAX_NEGATIVE = 1 << 31,
 
 	// Instance methods
@@ -1283,6 +1286,7 @@ var i,
 	push = arr.push,
 	slice = arr.slice,
 	// Use a stripped-down indexOf if we can't use a native one
+	// 定义一个 indexOf 方法（如果原生浏览器支持则使用原生的）
 	indexOf = arr.indexOf || function( elem ) {
 		var i = 0,
 			len = this.length;
@@ -1293,14 +1297,18 @@ var i,
 		}
 		return -1;
 	},
-
+	// 用来在做属性选择的时候进行判断
 	booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped",
 
 	// Regular expressions
 
 	// Whitespace characters http://www.w3.org/TR/css3-selectors/#whitespace
+	// 空白符正则
+	// \t 制表符；\r 回车；\n 换行；\f 换页；
+	// \x20 化为二进制数为 0010 0000 ，表示空格
 	whitespace = "[\\x20\\t\\r\\n\\f]",
 	// http://www.w3.org/TR/css3-syntax/#characters
+	// 匹配符合 css 命名的字符串
 	characterEncoding = "(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",
 
 	// Loosely modeled on CSS identifier characters
@@ -1321,15 +1329,19 @@ var i,
 	pseudos = ":(" + characterEncoding + ")(?:\\(((['\"])((?:\\\\.|[^\\\\])*?)\\3|((?:\\\\.|[^\\\\()[\\]]|" + attributes.replace( 3, 8 ) + ")*)|.*)\\)|)",
 
 	// Leading and non-escaped trailing whitespace, capturing some non-whitespace characters preceding the latter
+	// 匹配前后空格
 	rtrim = new RegExp( "^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+$", "g" ),
-
+	// 匹配逗号
 	rcomma = new RegExp( "^" + whitespace + "*," + whitespace + "*" ),
+	// 选择器当中的关系连接符 [>+~ whitespace ]
 	rcombinators = new RegExp( "^" + whitespace + "*([>+~]|" + whitespace + ")" + whitespace + "*" ),
-
+	// 兄弟关系[+~]
 	rsibling = new RegExp( whitespace + "*[+~]" ),
+	// 匹配属性等号 [type = xxx] =之后的 = xxx]
 	rattributeQuotes = new RegExp( "=" + whitespace + "*([^\\]'\"]*)" + whitespace + "*\\]", "g" ),
-
+	// 构造匹配伪类的正则表达式
 	rpseudo = new RegExp( pseudos ),
+	// 构造匹配符合 css 命名规范的字符串正则表达式
 	ridentifier = new RegExp( "^" + identifier + "$" ),
 
 	matchExpr = {
@@ -1347,18 +1359,24 @@ var i,
 		"needsContext": new RegExp( "^" + whitespace + "*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\(" +
 			whitespace + "*((?:-\\d)?\\d*)" + whitespace + "*\\)|)(?=[^-]|$)", "i" )
 	},
-
+	// 检测浏览器是否支持诸如 document.getElementById 、document.getElementByClassName 等方法
 	rnative = /^[^{]+\{\s*\[native \w/,
 
 	// Easily-parseable/retrievable ID or TAG or CLASS selectors
+	// 便捷的匹配 id tag 或者 class 选择器
 	rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,
 
+	// 匹配input类型：
+	// input select textarea button
 	rinputs = /^(?:input|select|textarea|button)$/i,
+	// 匹配 h1 ~ h6 标签
 	rheader = /^h\d$/i,
 
+	// 匹配 ' 和 \
 	rescape = /'|\\/g,
 
 	// CSS escapes http://www.w3.org/TR/CSS21/syndata.html#escaped-characters
+	// 正则匹配字符编码，类似 \0a0000 这样的编码
 	runescape = new RegExp( "\\\\([\\da-f]{1,6}" + whitespace + "?|(" + whitespace + ")|.)", "ig" ),
 	funescape = function( _, escaped, escapedWhitespace ) {
 		var high = "0x" + escaped - 0x10000;
@@ -1375,6 +1393,7 @@ var i,
 	};
 
 // Optimize for push.apply( _, NodeList )
+// 对 push.apply( _, NodeList ) 进行优化
 try {
 	push.apply(
 		(arr = slice.call( preferredDoc.childNodes )),
@@ -1402,27 +1421,35 @@ try {
 		}
 	};
 }
-
+// Sizzle 引擎的入口函数
 function Sizzle( selector, context, results, seed ) {
 	var match, elem, m, nodeType,
 		// QSA vars
 		i, groups, old, nid, newContext, newSelector;
 
+	// 如果上下文存在，获取 context.ownerDowcument 或 context ,否则获取 preferredDoc
+	// 再比较是否与 document 相同，不同就调用 setDocument（context）	
 	if ( ( context ? context.ownerDocument || context : preferredDoc ) !== document ) {
 		setDocument( context );
 	}
-
+	// 执行匹配的最初的上下文（即DOM元素集合）。若context没有赋值，则取document
+	// 已匹配出的部分最终结果。若results没有赋值，则赋予空数组
 	context = context || document;
 	results = results || [];
 
+	// 如果选择器字符串为空，返回 results
+	// results 可能是已匹配出的部分最终结果，也可能是空数组
 	if ( !selector || typeof selector !== "string" ) {
 		return results;
 	}
-
+	// 上下文节点类型不是元素节点、也不是Document类型
+	// 1 -- Element
+	// 9 -- Document
+	// 直接返回结果
 	if ( (nodeType = context.nodeType) !== 1 && nodeType !== 9 ) {
 		return [];
 	}
-
+	// seed 不存在
 	if ( documentIsHTML && !seed ) {
 
 		// Shortcuts
