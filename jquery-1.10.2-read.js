@@ -1453,8 +1453,11 @@ function Sizzle( selector, context, results, seed ) {
 	if ( documentIsHTML && !seed ) {
 
 		// Shortcuts
+		// selector 只存在三种选择器的情况下（id，tag，class）的快速处理方法
 		if ( (match = rquickExpr.exec( selector )) ) {
 			// Speed-up: Sizzle("#ID")
+			// 如果匹配到 id 选择器 #xx
+			// 先处理ID选择器，有效缩小查找范围，提升速度 
 			if ( (m = match[1]) ) {
 				if ( nodeType === 9 ) {
 					elem = context.getElementById( m );
@@ -1463,28 +1466,39 @@ function Sizzle( selector, context, results, seed ) {
 					if ( elem && elem.parentNode ) {
 						// Handle the case where IE, Opera, and Webkit return items
 						// by name instead of ID
+						// 有些浏览器使用 getElementById 也返回 name ，需要去除
 						if ( elem.id === m ) {
+							// 判断 id 是否与捕获组1相同，用来过滤 name 属性为 m ，但是 id 不是 m 的元素
 							results.push( elem );
 							return results;
 						}
 					} else {
+						// elem 不存在, 返回结果
 						return results;
 					}
 				} else {
 					// Context is not a document
+					// 上下文不是 Document 类型
 					if ( context.ownerDocument && (elem = context.ownerDocument.getElementById( m )) &&
 						contains( context, elem ) && elem.id === m ) {
+						// 上下文不是Document类型，如果context.ownerDocument存在且其中存在id/name为m的元素，
+						// 且该元素是context的子元素,且该元素的id为m
+						// 添加elem到结果集，返回结果
 						results.push( elem );
 						return results;
 					}
 				}
 
 			// Speed-up: Sizzle("TAG")
+			// 如果匹配到 tag 选择器 诸如div p 等
 			} else if ( match[2] ) {
+				// 如果标签名存在第二个捕获组
+				// 使用 getElementsByTagName 返回内容添加到结果集
 				push.apply( results, context.getElementsByTagName( selector ) );
 				return results;
 
 			// Speed-up: Sizzle(".CLASS")
+			// 类选择器，处理最慢放到最后
 			} else if ( (m = match[3]) && support.getElementsByClassName && context.getElementsByClassName ) {
 				push.apply( results, context.getElementsByClassName( m ) );
 				return results;
@@ -1492,6 +1506,11 @@ function Sizzle( selector, context, results, seed ) {
 		}
 
 		// QSA path
+		// QSA 表示 querySelectorAll，原生的QSA运行速度非常快,因此尽可能使用 QSA 来对 CSS 选择器进行查询
+		// querySelectorAll 是原生的选择器，但不支持老的浏览器版本, 主要是 IE8 及以前的浏览器
+		// rbuggyQSA 保存了用于解决一些浏览器兼容问题的 bug 修补的正则表达式
+		// QSA 在不同浏览器上运行的效果有差异，表现得非常奇怪，因此对某些 selector 不能用 QSA
+		// 为了适应不同的浏览器，就需要首先进行浏览器兼容性测试，然后确定测试正则表达式,用 rbuggyQSA 来确定 selector 是否能用 QSA
 		if ( support.qsa && (!rbuggyQSA || !rbuggyQSA.test( selector )) ) {
 			nid = old = expando;
 			newContext = context;
@@ -1501,26 +1520,40 @@ function Sizzle( selector, context, results, seed ) {
 			// We can work around this by specifying an extra ID on the root
 			// and working up from there (Thanks to Andrew Dupont for the technique)
 			// IE 8 doesn't work on object elements
+			// QSA 在以某个根节点为基础的查找中(.rootClass span)表现很奇怪
+			// 一个比较通常的解决方法是为根节点设置一个额外的id，并以此开始查询
+			// IE8 在对象元素上不起作用
 			if ( nodeType === 1 && context.nodeName.toLowerCase() !== "object" ) {
+				// 调用词法分析器分析选择器，得到一个 Token 序列
 				groups = tokenize( selector );
-
+				// 如果上下文有id属性，赋给old
 				if ( (old = context.getAttribute("id")) ) {
+					// 修改nid的值为 替换old中的每个单引号和斜杠为 $&
 					nid = old.replace( rescape, "\\$&" );
 				} else {
+					// 没有id属性，则给上下文设置id属性为 nid , 即sizzle+数字（时间.tostring）
+					// 这样保证context有id属性，让QSA正常工作
 					context.setAttribute( "id", nid );
 				}
+				// 给nid包装一下，做成一个属性选择器
 				nid = "[id='" + nid + "'] ";
 
 				i = groups.length;
 				while ( i-- ) {
+					// 给分组的每个选择器添加头部 nid 属性选择器
 					groups[i] = nid + toSelector( groups[i] );
 				}
+			    // 如果selector存在+~兄弟选择器，且上下文的父节点是符合要求的上下文
+				// 返回context.parentNode
+				// 否则返回context本身
 				newContext = rsibling.test( selector ) && context.parentNode || context;
+				// 以逗号分割分组（每个分组项前面添加了id属性选择器）
 				newSelector = groups.join(",");
 			}
 
 			if ( newSelector ) {
 				try {
+					// 使用新的选择器通过 QSA 来查询元素
 					push.apply( results,
 						newContext.querySelectorAll( newSelector )
 					);
@@ -1528,6 +1561,7 @@ function Sizzle( selector, context, results, seed ) {
 				} catch(qsaError) {
 				} finally {
 					if ( !old ) {
+						// 如果没有旧 id ,则移除
 						context.removeAttribute("id");
 					}
 				}
@@ -1536,6 +1570,8 @@ function Sizzle( selector, context, results, seed ) {
 	}
 
 	// All others
+	// 到这里仍没有返回结果，表明这些 selector 无法直接使用原生的 document 查询方法（当前浏览器不支持 QSA）
+	// 调用 select 方法
 	return select( selector.replace( rtrim, "$1" ), context, results, seed );
 }
 
@@ -1545,15 +1581,23 @@ function Sizzle( selector, context, results, seed ) {
  *	property name the (space-suffixed) string and (if the cache is larger than Expr.cacheLength)
  *	deleting the oldest entry
  */
+ // 创建一个 key-value 格式的缓存
 function createCache() {
+	// 用来保存已经存储过的 key-value
 	var keys = [];
 
 	function cache( key, value ) {
 		// Use (key + " ") to avoid collision with native prototype properties (see Issue #157)
+		// key 后面加空格是为了避免覆盖原生属性
+		// 当缓存栈超过长度限制时，则需要删除以前的缓存（后进先出，从栈底删除）
 		if ( keys.push( key += " " ) > Expr.cacheLength ) {
 			// Only keep the most recent entries
 			delete cache[ keys.shift() ];
 		}
+		// 返回 cache 对象,
+		// (由于 cache 对象包含了cache函数，cache函数调用了父级函数作用域变量keys，
+		// 外部引用了cache，形成闭包
+		// keys 成为chche私有变量
 		return (cache[ key ] = value);
 	}
 	return cache;
@@ -1563,6 +1607,7 @@ function createCache() {
  * Mark a function for special use by Sizzle
  * @param {Function} fn The function to mark
  */
+ // 标记函数
 function markFunction( fn ) {
 	fn[ expando ] = true;
 	return fn;
@@ -1572,6 +1617,7 @@ function markFunction( fn ) {
  * Support testing using an element
  * @param {Function} fn Passed the created div and expects a boolean result
  */
+ // 测试函数fn传入DOM元素div的返回值
 function assert( fn ) {
 	var div = document.createElement("div");
 
@@ -1594,6 +1640,8 @@ function assert( fn ) {
  * @param {String} attrs Pipe-separated list of attributes
  * @param {Function} handler The method that will be applied
  */
+ // attrs 用 | 分割的属性列表
+ // 给所有属性添加相同的处理程序
 function addHandle( attrs, handler ) {
 	var arr = attrs.split("|"),
 		i = attrs.length;
