@@ -1657,13 +1657,17 @@ function addHandle( attrs, handler ) {
  * @param {Element} b
  * @returns {Number} Returns less than 0 if a precedes b, greater than 0 if a follows b
  */
+ // 检查ab先后顺序
 function siblingCheck( a, b ) {
 	var cur = b && a,
+		// 如果b存在且a存在，返回a
 		diff = cur && a.nodeType === 1 && b.nodeType === 1 &&
+		// ~b.index即对b.index按位取反，不能转换为数字则返回NaN
 			( ~b.sourceIndex || MAX_NEGATIVE ) -
 			( ~a.sourceIndex || MAX_NEGATIVE );
 
 	// Use IE sourceIndex if available on both nodes
+	// 如果支持sourceIndex就使用它,否则使用nextSibling检查
 	if ( diff ) {
 		return diff;
 	}
