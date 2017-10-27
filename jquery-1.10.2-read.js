@@ -1688,6 +1688,7 @@ function siblingCheck( a, b ) {
  * Returns a function to use in pseudos for input types
  * @param {String} type
  */
+// 返回一个检测elem是input类型 且 type 属性为指定的type的函数
 function createInputPseudo( type ) {
 	return function( elem ) {
 		var name = elem.nodeName.toLowerCase();
@@ -1699,6 +1700,7 @@ function createInputPseudo( type ) {
  * Returns a function to use in pseudos for buttons
  * @param {String} type
  */
+// 返回一个检测节点名是input或button，type属性是指定的type的函数
 function createButtonPseudo( type ) {
 	return function( elem ) {
 		var name = elem.nodeName.toLowerCase();
@@ -1710,6 +1712,9 @@ function createButtonPseudo( type ) {
  * Returns a function to use in pseudos for positionals
  * @param {Function} fn
  */
+// 传入参数fn，返回一个函数，调用这个函数（argument）又返回一个函数（seed，matches），
+// 这个函数给fn传入参数[],seed.length,argument
+// fn返回matchIndexes，seed中匹配matchIndexes的项取反，matches得到匹配项
 function createPositionalPseudo( fn ) {
 	return markFunction(function( argument ) {
 		argument = +argument;
@@ -1721,6 +1726,7 @@ function createPositionalPseudo( fn ) {
 			// Match elements found at the specified indexes
 			while ( i-- ) {
 				if ( seed[ (j = matchIndexes[i]) ] ) {
+					// 如果seed[j]存在，seed[j]取非
 					seed[j] = !(matches[j] = seed[j]);
 				}
 			}
@@ -1732,6 +1738,7 @@ function createPositionalPseudo( fn ) {
  * Detect xml
  * @param {Element|Object} elem An element or a document
  */
+// 是否是XML
 isXML = Sizzle.isXML = function( elem ) {
 	// documentElement is verified for cases where it doesn't yet exist
 	// (such as loading iframes in IE - #4833)
@@ -1740,6 +1747,7 @@ isXML = Sizzle.isXML = function( elem ) {
 };
 
 // Expose support vars for convenience
+// 暴露 support 变量
 support = Sizzle.support = {};
 
 /**
@@ -1752,21 +1760,27 @@ setDocument = Sizzle.setDocument = function( node ) {
 		parent = doc.defaultView;
 
 	// If no document and documentElement is available, return
+	// 如果doc是docuemnt或不是Document类型或没有doc.documentElement，返回document
 	if ( doc === document || doc.nodeType !== 9 || !doc.documentElement ) {
 		return document;
 	}
 
 	// Set our document
+	// 设置document,docElem
 	document = doc;
 	docElem = doc.documentElement;
 
 	// Support tests
+	// 浏览器支持测试
 	documentIsHTML = !isXML( doc );
 
 	// Support: IE>8
 	// If iframe document is assigned to "document" variable and if iframe has been reloaded,
 	// IE will throw "permission denied" error when accessing "document" variable, see jQuery #13936
 	// IE6-8 do not support the defaultView property so parent will be undefined
+	// 如果iframe document被分配给 “document” 变量且iframe重新加载了，
+	// 访问document变量时，IE会抛出“没有权限”的错误；
+	// IE678不支持defaultView属性，parent会是undefined
 	if ( parent && parent.attachEvent && parent !== parent.top ) {
 		parent.attachEvent( "onbeforeunload", function() {
 			setDocument();
@@ -1778,6 +1792,8 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 	// Support: IE<8
 	// Verify that getAttribute really returns attributes and not properties (excepting IE8 booleans)
+	// 检查getAttribute真的返回了属性值，而不是（调用它的对象的）属性
+	// (排除IE8的布尔值)
 	support.attributes = assert(function( div ) {
 		div.className = "i";
 		return !div.getAttribute("className");
@@ -1787,12 +1803,16 @@ setDocument = Sizzle.setDocument = function( node ) {
 	---------------------------------------------------------------------- */
 
 	// Check if getElementsByTagName("*") returns only elements
+	// 检查getELementsByTagName（“*”）返回的是否只有元素节点类型（可能有注释节点）
 	support.getElementsByTagName = assert(function( div ) {
+		//创建并添加注释节点
 		div.appendChild( doc.createComment("") );
+		// 使用getElementsByTagName("*")如果得到结果length不为0，返回false
 		return !div.getElementsByTagName("*").length;
 	});
 
 	// Check if getElementsByClassName can be trusted
+	// 测试是否支持getElementsByClassName
 	support.getElementsByClassName = assert(function( div ) {
 		div.innerHTML = "<div class='a'></div><div class='a i'></div>";
 
@@ -1808,42 +1828,54 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// Check if getElementById returns elements by name
 	// The broken getElementById methods don't pick up programatically-set names,
 	// so use a roundabout getElementsByName test
+	// 兼容 IE10 以下
+	// 检查是否支持 getElementById
+	// getElemenById 方法不收集程序设置的 name 属性，所以迂回的使用 getElementsByName 测试
 	support.getById = assert(function( div ) {
 		docElem.appendChild( div ).id = expando;
 		return !doc.getElementsByName || !doc.getElementsByName( expando ).length;
 	});
 
 	// ID find and filter
+	// 定义 id 选择器的实现方法 Expr.find["ID"] 以及过滤方法 Expr.filter["ID"]
 	if ( support.getById ) {
 		Expr.find["ID"] = function( id, context ) {
 			if ( typeof context.getElementById !== strundefined && documentIsHTML ) {
 				var m = context.getElementById( id );
 				// Check parentNode to catch when Blackberry 4.6 returns
 				// nodes that are no longer in the document #6963
+				// blackberry4.6返回不在document的节点，需要检查匹配元素的父节点确保它存在document中
 				return m && m.parentNode ? [m] : [];
 			}
 		};
 		Expr.filter["ID"] = function( id ) {
+			// 替换id中的\aaaa为对应字符
 			var attrId = id.replace( runescape, funescape );
 			return function( elem ) {
+				// 返回函数，这个函数传入elem，判断elem.id是否是指定id
 				return elem.getAttribute("id") === attrId;
 			};
 		};
 	} else {
 		// Support: IE6/7
 		// getElementById is not reliable as a find shortcut
+		// getElementById不被支持
+		// 使用getAttributeNode代替
+		// 删除Expr.find["ID"]
 		delete Expr.find["ID"];
 
 		Expr.filter["ID"] =  function( id ) {
 			var attrId = id.replace( runescape, funescape );
 			return function( elem ) {
 				var node = typeof elem.getAttributeNode !== strundefined && elem.getAttributeNode("id");
+				// 获得属性节点ID
 				return node && node.value === attrId;
 			};
 		};
 	}
 
 	// Tag
+	// 定义 Tag 选择器的实现方法
 	Expr.find["TAG"] = support.getElementsByTagName ?
 		function( tag, context ) {
 			if ( typeof context.getElementsByTagName !== strundefined ) {
@@ -1870,6 +1902,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 		};
 
 	// Class
+	// 定义 Class 选择器的实现方法
 	Expr.find["CLASS"] = support.getElementsByClassName && function( className, context ) {
 		if ( typeof context.getElementsByClassName !== strundefined && documentIsHTML ) {
 			return context.getElementsByClassName( className );
@@ -1882,6 +1915,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// QSA and matchesSelector support
 
 	// matchesSelector(:active) reports false when true (IE9/Opera 11.5)
+	// (:active)选择符在IE9、Opera11.5中报错
 	rbuggyMatches = [];
 
 	// qSa(:focus) reports false when true (Chrome 21)
@@ -1889,8 +1923,11 @@ setDocument = Sizzle.setDocument = function( node ) {
 	// whenever `document.activeElement` is accessed on an iframe
 	// So, we allow :focus to pass through QSA all the time to avoid the IE error
 	// See http://bugs.jquery.com/ticket/13378
+	// 在IE8/9中访问iframe的document.activeElement总会抛出错误，
+	// 所以允许（:focus）传递给QSA来避免这个BUG
 	rbuggyQSA = [];
 
+	// 支持原生的QSA
 	if ( (support.qsa = rnative.test( doc.querySelectorAll )) ) {
 		// Build QSA regex
 		// Regex strategy adopted from Diego Perini
@@ -1900,18 +1937,27 @@ setDocument = Sizzle.setDocument = function( node ) {
 			// setting a boolean content attribute,
 			// since its presence should be enough
 			// http://bugs.jquery.com/ticket/12359
+			// Select被故意置空字符串，
+			// 用来测试IE如何处理没有明确的
+			// 设置一个布尔值属性，
+			// 因为它的存在就足够了
 			div.innerHTML = "<select><option selected=''></option></select>";
 
 			// Support: IE8
 			// Boolean attributes and "value" are not treated correctly
+			// 如果^=,$=,*=后面为空字符串，不应该返回任何东西
 			if ( !div.querySelectorAll("[selected]").length ) {
+				//返回了内容，浏览器对QSA支持有bug，给rbuggyQSA添加正则表达式
+				//[*^$]=whitespace*(?:'|"")
 				rbuggyQSA.push( "\\[" + whitespace + "*(?:value|" + booleans + ")" );
 			}
 
 			// Webkit/Opera - :checked should return selected option elements
 			// http://www.w3.org/TR/2011/REC-css3-selectors-20110929/#checked
 			// IE8 throws error here and will not see later tests
+			//：checked应该返回selected的options
 			if ( !div.querySelectorAll(":checked").length ) {
+				// 没有正确处理:checked，给rbuggy添加正则表达式 :checked
 				rbuggyQSA.push(":checked");
 			}
 		});
@@ -2085,11 +2131,11 @@ setDocument = Sizzle.setDocument = function( node ) {
 
 	return doc;
 };
-
+// 检查多个元素匹配expr的部分
 Sizzle.matches = function( expr, elements ) {
 	return Sizzle( expr, null, null, elements );
 };
-
+// 兼容的matchesSelector，检查单个元素elem是否匹配expr
 Sizzle.matchesSelector = function( elem, expr ) {
 	// Set document vars if needed
 	if ( ( elem.ownerDocument || elem ) !== document ) {
@@ -2097,16 +2143,19 @@ Sizzle.matchesSelector = function( elem, expr ) {
 	}
 
 	// Make sure that attribute selectors are quoted
+	// 去掉属性选择器多余的空白，添加单引号确保属性值被引号包围
 	expr = expr.replace( rattributeQuotes, "='$1']" );
 
 	if ( support.matchesSelector && documentIsHTML &&
 		( !rbuggyMatches || !rbuggyMatches.test( expr ) ) &&
 		( !rbuggyQSA     || !rbuggyQSA.test( expr ) ) ) {
-
+		// 浏览器对matchesSelector，qsa的支持很完美
 		try {
 			var ret = matches.call( elem, expr );
 
 			// IE 9's matchesSelector returns false on disconnected nodes
+			// IE9的matchesSelector处理断开连接的节点时返回false，
+			// 当ret有结果 or 浏览器支持断开的节点匹配 or elem不在documentFragment中时，返回ret
 			if ( ret || support.disconnectedMatch ||
 					// As well, disconnected nodes are said to be in a document
 					// fragment in IE 9
@@ -2115,10 +2164,10 @@ Sizzle.matchesSelector = function( elem, expr ) {
 			}
 		} catch(e) {}
 	}
-
+	// 浏览器不能完美支持qsa和matchesSelector，使用Sizzle函数，候选集设置为[elem]，检查返回结果
 	return Sizzle( expr, document, null, [elem] ).length > 0;
 };
-
+// 检查包含关系，调用setDocument函数中定义的contains函数
 Sizzle.contains = function( context, elem ) {
 	// Set document vars if needed
 	if ( ( context.ownerDocument || context ) !== document ) {
