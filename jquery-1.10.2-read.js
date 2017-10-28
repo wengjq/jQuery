@@ -2181,22 +2181,27 @@ Sizzle.attr = function( elem, name ) {
 	if ( ( elem.ownerDocument || elem ) !== document ) {
 		setDocument( elem );
 	}
-
+	// 获得attrHandle
 	var fn = Expr.attrHandle[ name.toLowerCase() ],
 		// Don't get fooled by Object.prototype properties (jQuery #13807)
+		// 检查有没有自己的name属性
 		val = fn && hasOwn.call( Expr.attrHandle, name.toLowerCase() ) ?
 			fn( elem, name, !documentIsHTML ) :
 			undefined;
 
 	return val === undefined ?
+	// val为undefined时
+	// 支持getAttribute或是XML文档
 		support.attributes || !documentIsHTML ?
 			elem.getAttribute( name ) :
+			// 不支持getAttribute且是HTML文档
 			(val = elem.getAttributeNode(name)) && val.specified ?
+			// 得到属性节点且有specified标记（标记在对象本身中的属性），返回属性节点value
 				val.value :
 				null :
 		val;
 };
-
+// 用来抛出错误的函数
 Sizzle.error = function( msg ) {
 	throw new Error( "Syntax error, unrecognized expression: " + msg );
 };
