@@ -2210,6 +2210,7 @@ Sizzle.error = function( msg ) {
  * Document sorting and removing duplicates
  * @param {ArrayLike} results
  */
+// 唯一性的排序（去重）
 Sizzle.uniqueSort = function( results ) {
 	var elem,
 		duplicates = [],
@@ -2239,6 +2240,7 @@ Sizzle.uniqueSort = function( results ) {
  * Utility function for retrieving the text value of an array of DOM nodes
  * @param {Array|Element} elem
  */
+ // 一个用来检测DOM节点（数组）的文本值的通用函数
 getText = Sizzle.getText = function( elem ) {
 	var node,
 		ret = "",
@@ -2269,10 +2271,11 @@ getText = Sizzle.getText = function( elem ) {
 
 	return ret;
 };
-
+// 记录跟选择器相关的属性以及操作
 Expr = Sizzle.selectors = {
 
 	// Can be adjusted by the user
+	// 用户可调整
 	cacheLength: 50,
 
 	createPseudo: markFunction,
@@ -2282,15 +2285,16 @@ Expr = Sizzle.selectors = {
 	attrHandle: {},
 
 	find: {},
-
+	// 关系选择器
 	relative: {
 		">": { dir: "parentNode", first: true },
 		" ": { dir: "parentNode" },
 		"+": { dir: "previousSibling", first: true },
 		"~": { dir: "previousSibling" }
 	},
-
+	// 预过滤
 	preFilter: {
+		// 属性选择器预过滤
 		"ATTR": function( match ) {
 			match[1] = match[1].replace( runescape, funescape );
 
@@ -2303,7 +2307,7 @@ Expr = Sizzle.selectors = {
 
 			return match.slice( 0, 4 );
 		},
-
+		// child选择器预处理
 		"CHILD": function( match ) {
 			/* matches from matchExpr["CHILD"]
 				1 type (only|nth|...)
@@ -2335,7 +2339,7 @@ Expr = Sizzle.selectors = {
 
 			return match;
 		},
-
+		// 伪类选择器预处理 
 		"PSEUDO": function( match ) {
 			var excess,
 				unquoted = !match[5] && match[2];
@@ -2364,9 +2368,9 @@ Expr = Sizzle.selectors = {
 			return match.slice( 0, 3 );
 		}
 	},
-
+	// 过滤函数
 	filter: {
-
+		// 标签过滤函数
 		"TAG": function( nodeNameSelector ) {
 			var nodeName = nodeNameSelector.replace( runescape, funescape ).toLowerCase();
 			return nodeNameSelector === "*" ?
@@ -2375,7 +2379,7 @@ Expr = Sizzle.selectors = {
 					return elem.nodeName && elem.nodeName.toLowerCase() === nodeName;
 				};
 		},
-
+		// 类过滤函数
 		"CLASS": function( className ) {
 			var pattern = classCache[ className + " " ];
 
@@ -2385,7 +2389,9 @@ Expr = Sizzle.selectors = {
 					return pattern.test( typeof elem.className === "string" && elem.className || typeof elem.getAttribute !== strundefined && elem.getAttribute("class") || "" );
 				});
 		},
-
+		// 属性预过滤
+		// check是检查值，name属性名，operator是操作符
+		// 返回布尔值
 		"ATTR": function( name, operator, check ) {
 			return function( elem ) {
 				var result = Sizzle.attr( elem, name );
@@ -2409,7 +2415,7 @@ Expr = Sizzle.selectors = {
 					false;
 			};
 		},
-
+		// 子元素选择器过滤 
 		"CHILD": function( type, what, argument, first, last ) {
 			var simple = type.slice( 0, 3 ) !== "nth",
 				forward = type.slice( -4 ) !== "last",
@@ -2498,12 +2504,15 @@ Expr = Sizzle.selectors = {
 					}
 				};
 		},
-
+		// 伪类过滤
 		"PSEUDO": function( pseudo, argument ) {
 			// pseudo-class names are case-insensitive
 			// http://www.w3.org/TR/selectors/#pseudo-classes
 			// Prioritize by case sensitivity in case custom pseudos are added with uppercase letters
 			// Remember that setFilters inherits from pseudos
+			// 伪类大小写不敏感
+			// 优先考虑大小写敏感万一自定义伪类添加了大写字母
+			// setFilters继承自pseudos
 			var args,
 				fn = Expr.pseudos[ pseudo ] || Expr.setFilters[ pseudo.toLowerCase() ] ||
 					Sizzle.error( "unsupported pseudo: " + pseudo );
@@ -2536,7 +2545,7 @@ Expr = Sizzle.selectors = {
 			return fn;
 		}
 	},
-
+	// 伪类过滤函数
 	pseudos: {
 		// Potentially complex pseudos
 		"not": markFunction(function( selector ) {
@@ -2735,7 +2744,7 @@ Expr = Sizzle.selectors = {
 		})
 	}
 };
-
+// nth与eq相同的过滤函数
 Expr.pseudos["nth"] = Expr.pseudos["eq"];
 
 // Add button/input type pseudos
@@ -2751,6 +2760,7 @@ function setFilters() {}
 setFilters.prototype = Expr.filters = Expr.pseudos;
 Expr.setFilters = new setFilters();
 
+// 词法分析，返回的是一个Token序列(根据是否是并联选择器，可能返回的是多组Token序列)
 function tokenize( selector, parseOnly ) {
 	var matched, match, tokens, type,
 		soFar, groups, preFilters,
@@ -2817,7 +2827,7 @@ function tokenize( selector, parseOnly ) {
 			// Cache the tokens
 			tokenCache( selector, groups ).slice( 0 );
 }
-
+// tokens转换为selector
 function toSelector( tokens ) {
 	var i = 0,
 		len = tokens.length,
@@ -2827,7 +2837,7 @@ function toSelector( tokens ) {
 	}
 	return selector;
 }
-
+// 生成关系选择符过滤函数
 function addCombinator( matcher, combinator, base ) {
 	var dir = combinator.dir,
 		checkNonElements = base && dir === "parentNode",
