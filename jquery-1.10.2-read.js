@@ -2887,7 +2887,7 @@ function addCombinator( matcher, combinator, base ) {
 			}
 		};
 }
-
+// matchers为数组的情况，返回过滤函数
 function elementMatcher( matchers ) {
 	return matchers.length > 1 ?
 		function( elem, context, xml ) {
@@ -2901,7 +2901,8 @@ function elementMatcher( matchers ) {
 		} :
 		matchers[0];
 }
-
+// 根据filter缩小unmatched范围，保留map对应
+// 如果不传入filter，context，xml可以只生成unmatched对应的map
 function condense( unmatched, map, filter, context, xml ) {
 	var elem,
 		newUnmatched = [],
@@ -2922,7 +2923,7 @@ function condense( unmatched, map, filter, context, xml ) {
 
 	return newUnmatched;
 }
-
+// 设置匹配处理函数，参数有预过滤函数，选择器，matcher函数，后置过滤函数，后置查找函数，后置选择器
 function setMatcher( preFilter, selector, matcher, postFilter, postFinder, postSelector ) {
 	if ( postFilter && !postFilter[ expando ] ) {
 		postFilter = setMatcher( postFilter );
@@ -3015,7 +3016,7 @@ function setMatcher( preFilter, selector, matcher, postFilter, postFinder, postS
 		}
 	});
 }
-
+// 通过解析的selector来获得对应的过滤函数
 function matcherFromTokens( tokens ) {
 	var checkContext, matcher, j,
 		len = tokens.length,
@@ -3070,7 +3071,7 @@ function matcherFromTokens( tokens ) {
 
 	return elementMatcher( matchers );
 }
-
+// 多个elementMatcher和多个setMatcher的情况下，返回superMatcher
 function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 	// A counter to specify which element is currently being matched
 	var matcherCachedRuns = 0,
@@ -3171,7 +3172,8 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 		markFunction( superMatcher ) :
 		superMatcher;
 }
-
+// 把selector分组，得到对应的elementMatchers或setMatchers，再调用matcherFromGroupMatchers获得总的matcher
+// 并缓存到compilerCache中，以后使用相同selector时，直接查询的到结果。
 compile = Sizzle.compile = function( selector, group /* Internal Use Only */ ) {
 	var i,
 		setMatchers = [],
@@ -3345,9 +3347,13 @@ jQuery.contains = Sizzle.contains;
 
 })( window );
 // String to Object options format cache
+// 创建一个 options 缓存，用于 Callbacks
 var optionsCache = {};
 
 // Convert String-formatted options into Object-formatted ones and store in cache
+// 生成一个 options 配置对象
+// 使用 optionsCache[ options ] 缓存住配置对象
+// 生成的配置对象就是{once:true, memory:true}
 function createOptions( options ) {
 	var object = optionsCache[ options ] = {};
 	jQuery.each( options.match( core_rnotwhite ) || [], function( _, flag ) {
@@ -3378,6 +3384,12 @@ function createOptions( options ) {
  *	stopOnFalse:	interrupt callings when a callback returns false
  *
  */
+// options 参数包含四个可选项，可用空格或者, 分隔，分别是
+// once 、 memory 、 unique 、stopOnFalse
+// once -- 确保这个回调列表只执行（ .fire() ）一次(像一个递延 Deferred)
+// memory -- 保持以前的值，将添加到这个列表的后面的最新的值立即执行调用任何回调 (像一个递延 Deferred)
+// unique -- 确保一次只能添加一个回调(所以在列表中没有重复的回调)
+// stopOnFalse -- 当一个回调返回 false 时中断调用
 jQuery.Callbacks = function( options ) {
 
 	// Convert options from String-formatted to Object-formatted if needed
