@@ -3394,27 +3394,40 @@ jQuery.Callbacks = function( options ) {
 
 	// Convert options from String-formatted to Object-formatted if needed
 	// (we check in cache first)
+	// 通过字符串在optionsCache寻找有没有相应缓存，如果没有则创建一个，有则引用
 	options = typeof options === "string" ?
 		( optionsCache[ options ] || createOptions( options ) ) :
 		jQuery.extend( {}, options );
 
 	var // Flag to know if list is currently firing
+		// 列表中的函数是否正在回调中
 		firing,
 		// Last fire value (for non-forgettable lists)
+		// 最后一次触发回调时传的参数
 		memory,
 		// Flag to know if list was already fired
+		// 列表中的函数是否已经回调至少一次
 		fired,
 		// End of the loop when firing
+		// 需要 fire 的队列长度
 		firingLength,
 		// Index of currently firing callback (modified by remove if needed)
+		// 当前正在firing的回调在队列的索引
 		firingIndex,
 		// First callback to fire (used internally by add and fireWith)
+		// 回调的起点
 		firingStart,
 		// Actual callback list
+		// 回调函数列表
 		list = [],
 		// Stack of fire calls for repeatable lists
+		// 可重复的回调函数堆栈，用于控制触发回调时的参数列表
+		// 如果不是once的，那么stack会keep住fire所需的上下文跟参数（假设称为事件）
 		stack = !options.once && [],
 		// Fire callbacks
+		// 触发回调函数列表
+		// 这个函数是内部使用的辅助函数，私有方法
+		// 它被 self.fire 以及 self.fireWith 调用
 		fire = function( data ) {
 			memory = options.memory && data;
 			fired = true;
