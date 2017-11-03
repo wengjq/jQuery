@@ -3429,32 +3429,54 @@ jQuery.Callbacks = function( options ) {
 		// 这个函数是内部使用的辅助函数，私有方法
 		// 它被 self.fire 以及 self.fireWith 调用
 		fire = function( data ) {
+			// 如果参数 memory 为true，则记录 data
+			// 如果是 memory 类型管理器
+			// 要记住 fire 的事件 data，以便下次 add 的时候可以重新 fire 这个事件
 			memory = options.memory && data;
 			fired = true;
 			firingIndex = firingStart || 0;
 			firingStart = 0;
 			firingLength = list.length;
+			// 开始 fire,表示正在 fire
 			firing = true;
+			// 遍历回调队列 list
 			for ( ; list && firingIndex < firingLength; firingIndex++ ) {
+				// data[ 0 ]是函数执行的上下文，也就是平时的this
+				// 这里看再看下 self.fireWith 传过来的参数 args 的格式
+				// 如果是stopOnFalse管理器，并且回调返回值是false，中断！
+				// list[ firingIndex ].apply( data[ 0 ], data[ 1 ] ) 是最终的执行回调的方法
 				if ( list[ firingIndex ].apply( data[ 0 ], data[ 1 ] ) === false && options.stopOnFalse ) {
 					memory = false; // To prevent further calls using add
 					break;
 				}
 			}
+			// 结束 fire ，标记回调结束
 			firing = false;
 			if ( list ) {
 				if ( stack ) {
+					// 如果事件栈还不为空
+					// 不是 "once" 的情况
 					if ( stack.length ) {
+						// 从堆栈头部取出，递归fire
 						fire( stack.shift() );
+						// 这里是深度遍历，直到事件队列为空
 					}
+					// 深度遍历结束
+					// 等到fire完所有的事件后
+					// 如果是memory类型管理器，下次还能继续
 				} else if ( memory ) {
+					// 清空队列
+					// "once memory" ，或者 "memory" 情况下 lock 过。
 					list = [];
 				} else {
+					// once
 					self.disable();
 				}
 			}
 		},
 		// Actual Callbacks object
+		// 实际的 callbacks 对象
+		// var callbacks = $.Callbacks() 最后返回的是 sele 对象
 		self = {
 			// Add a callback or a collection of callbacks to the list
 			add: function() {
