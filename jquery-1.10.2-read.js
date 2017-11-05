@@ -3479,31 +3479,55 @@ jQuery.Callbacks = function( options ) {
 		// var callbacks = $.Callbacks() 最后返回的是 sele 对象
 		self = {
 			// Add a callback or a collection of callbacks to the list
+			// 向回调列表中添加一个回调或回调的集合。
+			// 也就是实参可以是一个函数，或者一个函数数组
 			add: function() {
+				// 确保 list 是存在的
 				if ( list ) {
 					// First, we save the current length
+					// 首先，存储当前回调队列的长度
 					var start = list.length;
+					// 这里是一个立即执行函数，参数 add 是传入的参数
+					// 直接遍历传过来的 arguments 进行 push
 					(function add( args ) {
+						// 遍历这个 参数 集合
 						jQuery.each( args, function( _, arg ) {
+							// 类型判断
 							var type = jQuery.type( arg );
+							// 如果传入的是单个方法
 							if ( type === "function" ) {
+								// 不是unique管理器或者当前队列还没有该回调
 								if ( !options.unique || !self.has( arg ) ) {
+									// 将回调push入队列
 									list.push( arg );
 								}
+								// 如果传入的是回调的集合数组 或者 array-like
+								// 因为可以同时add多个回调
+								// 从这里可以看出add的传参可以有add(fn),add([fn1,fn2]),add(fn1,fn2)
+								// 同时这里排除掉type为string的情况，其实是提高效率，不加判断也能正确
 							} else if ( arg && arg.length && type !== "string" ) {
 								// Inspect recursively
+								// 递归调用自己，注意这个使用技巧
+								// 如果是数组，以这个数组为参数再递归调用这个立即执行函数本身
 								add( arg );
 							}
 						});
 					})( arguments );
 					// Do we need to add the callbacks to the
 					// current firing batch?
+					// 如果当前在 firing 当中，那就把需要firing的长度设置成列表长度
 					if ( firing ) {
 						firingLength = list.length;
 					// With memory, if we're not firing then
 					// we should call right away
+					// 如果已经 fire 过并且是 memory 类型的管理器
+					// memory 在这里是上一次 fire 的 [context, args]
 					} else if ( memory ) {
 						firingStart = start;
+						// memory 在上一次 fire 的时候被记录过了
+						// fire 的时候有这么一段
+						// memory = options.memory && data;
+						// memory 作用在这里，没有fire，一样有结果
 						fire( memory );
 					}
 				}
