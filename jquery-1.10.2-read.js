@@ -3534,13 +3534,24 @@ jQuery.Callbacks = function( options ) {
 				return this;
 			},
 			// Remove a callback from the list
+			// 从队列中移除一个或多个回调
 			remove: function() {
+				// 确保队列是存在的
 				if ( list ) {
+					// 遍历传入的参数（即是要移除的回调）
 					jQuery.each( arguments, function( _, arg ) {
 						var index;
+						// inArray(elem,arr,i) -- 在数组中查找指定值并返回它的索引（如果没有找到，则返回-1）
+						// elem 规定需检索的值, arr 数组, i 可选的整数参数
 						while( ( index = jQuery.inArray( arg, list, index ) ) > -1 ) {
+							// splice(index,howmany) 方法向/从数组中添加/删除项目，然后返回被删除的项目
+							// index -- 必需。整数，规定添加/删除项目的位置
+							// howmany -- 必需。要删除的项目数量。如果设置为 0，则不会删除项目
+							// 从回调队列中移除当前查找到的这个方法
 							list.splice( index, 1 );
 							// Handle firing indexes
+							// 在函数列表处于firing状态时，最主要的就是维护firingLength和firgingIndex这两个值
+							// 保证fire时函数列表中的函数能够被正确执行（fire中的for循环需要这两个值
 							if ( firing ) {
 								if ( index <= firingLength ) {
 									firingLength--;
