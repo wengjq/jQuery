@@ -3567,21 +3567,26 @@ jQuery.Callbacks = function( options ) {
 			},
 			// Check if a given callback is in the list.
 			// If no argument is given, return whether or not list has callbacks attached.
+			// 查找一个给定的回调函数是否存在于回调列表中
 			has: function( fn ) {
 				return fn ? jQuery.inArray( fn, list ) > -1 : !!( list && list.length );
 			},
 			// Remove all callbacks from the list
+			// 清空回调列表
 			empty: function() {
 				list = [];
 				firingLength = 0;
 				return this;
 			},
 			// Have the list do nothing anymore
+			// 禁用回调列表中的回调
+			// 禁用掉之后，把里边的队列、栈等全部清空了！无法再恢复了
 			disable: function() {
 				list = stack = memory = undefined;
 				return this;
 			},
 			// Is it disabled?
+			// 列表是否被禁用
 			disabled: function() {
 				return !list;
 			},
@@ -3598,24 +3603,37 @@ jQuery.Callbacks = function( options ) {
 				return !stack;
 			},
 			// Call all callbacks with the given context and arguments
+			// 以给定的上下文和参数调用所有回调函数
 			fireWith: function( context, args ) {
+				// list 不为空
+				// 并且没有 fire 过或者 stack 不为空
 				if ( list && ( !fired || stack ) ) {
 					args = args || [];
+					// 把 args 组织成 [context, [arg1, arg2, arg3, ...]]
+					// 可以看到第一个参数是上下文
 					args = [ context, args.slice ? args.slice() : args ];
+					// 如果当前还在 firing
 					if ( firing ) {
+						// 将参数推入堆栈，等待当前回调结束再调用
 						stack.push( args );
 					} else {
+						// 否则直接调用
+						// 这里调用的 fire 是内部使用的 fire 方法，不是self.fire
 						fire( args );
 					}
 				}
 				return this;
 			},
 			// Call all the callbacks with the given arguments
+			// 以给定的参数调用所有回调函数
+			// 外观模式 self.fire –> self.fireWith –> fire
+			// 最终执行代码是内部私有的 fire 方法
 			fire: function() {
 				self.fireWith( this, arguments );
 				return this;
 			},
 			// To know if the callbacks have already been called at least once
+			// 回调函数列表是否至少被调用一次
 			fired: function() {
 				return !!fired;
 			}
