@@ -3641,6 +3641,7 @@ jQuery.Callbacks = function( options ) {
 
 	return self;
 };
+// 当 jQuery.extend 只有一个参数的时候，其实就是对 jQuery 静态方法的一个扩展
 jQuery.extend({
 
 	Deferred: function( func ) {
