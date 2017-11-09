@@ -3643,7 +3643,17 @@ jQuery.Callbacks = function( options ) {
 };
 // 当 jQuery.extend 只有一个参数的时候，其实就是对 jQuery 静态方法的一个扩展
 jQuery.extend({
-
+	// Deferred 方法
+	// 生成的 deferred 对象就是 jQuery 的回调函数解决方案
+	// $.Deferred() 生成一个 deferred 对象
+	// deferred.done(fnc) 指定操作成功时的回调函数
+	// deferred.fail(fnc) 指定操作失败时的回调函数
+	// deferred.promise() 没有参数时，返回一个新的deferred对象，该对象的运行状态无法被改变；接受参数时，作用为在参数对象上部署 deferred 接口
+	// deferred.resolve() 手动改变 deferred 对象的运行状态为"已完成"，从而立即触发 done() 方法
+	// deferred.reject() 这个方法与 deferred.resolve() 正好相反，调用后将 deferred 对象的运行状态变为"已失败"，从而立即触发 fail() 方法
+	// $.when() 为多个操作指定回调函数
+	// deferred.then() 便捷写法，把 done()、fail() 和 progress() 合在一起写
+	// deferred.always() 用来指定回调函数的，它的作用是，不管调用的是 deferred.resolve() 还是 deferred.reject()，最后总是执行
 	Deferred: function( func ) {
 		var tuples = [
 				// action, add listener, listener list, final state
