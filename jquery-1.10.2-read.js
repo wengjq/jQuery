@@ -3655,8 +3655,18 @@ jQuery.extend({
 	// deferred.then() 便捷写法，把 done()、fail() 和 progress() 合在一起写
 	// deferred.always() 用来指定回调函数的，它的作用是，不管调用的是 deferred.resolve() 还是 deferred.reject()，最后总是执行
 	Deferred: function( func ) {
+		// tuples 创建三个 $.Callbacks 对象，分别表示成功，失败，处理中三种状态
+		// 为什么要写成 tuples 这种格式呢，其实是把相同有共同特性的代码的给合并成一种结构，
+		// 然后下面通过 jQuery.each(tuples, function(i, tuple) {} 一次处理
 		var tuples = [
 				// action, add listener, listener list, final state
+				// 三个队列，done|fail|progress 成功|失败|处理中
+				// resolved 对应 已完成
+				// resolved 对象立刻调用 done()方法指定的回调函数
+				// rejected 对应 已失败
+				// rejected 对象立刻调用 fail()方法指定的回调函数
+				// notify 对应 处理中
+				// progress 对象立刻调用 progress()方法指定的回调函数
 				[ "resolve", "done", jQuery.Callbacks("once memory"), "resolved" ],
 				[ "reject", "fail", jQuery.Callbacks("once memory"), "rejected" ],
 				[ "notify", "progress", jQuery.Callbacks("memory") ]
