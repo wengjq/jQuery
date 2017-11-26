@@ -3353,7 +3353,7 @@ var optionsCache = {};
 // Convert String-formatted options into Object-formatted ones and store in cache
 // 生成一个 options 配置对象
 // 使用 optionsCache[ options ] 缓存住配置对象
-// 生成的配置对象就是{once:true, memory:true}
+// optionsCache['once memory'] 生成的配置对象就是{once:true, memory:true}
 function createOptions( options ) {
 	var object = optionsCache[ options ] = {};
 	jQuery.each( options.match( core_rnotwhite ) || [], function( _, flag ) {
@@ -3671,13 +3671,22 @@ jQuery.extend({
 				[ "reject", "fail", jQuery.Callbacks("once memory"), "rejected" ],
 				[ "notify", "progress", jQuery.Callbacks("memory") ]
 			],
+			// 初始状态 ，pending 的意思为待定
 			state = "pending",
+
+			// 定义一个 promise 对象，坑爹是这个对象里面还有一个 promise 对象需要注意
+			// 具有 state、always、then、primise 方法
 			promise = {
+				// 返回一个 Deferred 对象的当前状态
 				state: function() {
 					return state;
 				},
+				// 这个方法也是用来指定回调函数的
+				// 它的作用是，不管调用的是 deferred.resolve() 还是 deferred.reject() ，最后总是执行
 				always: function() {
+					// deferred 是最终生成的异步队列实例
 					deferred.done( arguments ).fail( arguments );
+					// 返回 this，便于链式操作
 					return this;
 				},
 				then: function( /* fnDone, fnFail, fnProgress */ ) {
