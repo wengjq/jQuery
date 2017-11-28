@@ -3689,25 +3689,44 @@ jQuery.extend({
 					// 返回 this，便于链式操作
 					return this;
 				},
+				// 把 done()、fail() 和 progress() 合在一起写
+				// deferred.done(fnDone), fail(fnFail) , progress(fnProgress) 的快捷方式
 				then: function( /* fnDone, fnFail, fnProgress */ ) {
+					// 参数为传入的 done 、 fail 、progress 函数
+					// fns = [fnDone, fnFail, fnProgress]
 					var fns = arguments;
+
+					// 这里 return jQuery.Deferred(function( newDefer ) {}).promise();
+					// 这里可以看到，又使用了 jQuery.Deferred() 对 then 方法里面的参数又封装了一次
 					return jQuery.Deferred(function( newDefer ) {
+
+						// 遍历 tuples
 						jQuery.each( tuples, function( i, tuple ) {
+							// action 表示三种状态 resolve 、reject 、notify 其中之一
+							// 分别对应 fnDone, fnFail, fnProgress（首先用 isFunction 判断传入的参数是否是方法，注意 && 在这里的用法）
 							var action = tuple[ 0 ],
 								fn = jQuery.isFunction( fns[ i ] ) && fns[ i ];
 							// deferred[ done | fail | progress ] for forwarding actions to newDefer
+							// deferred[ done | fail | progress ] for forwarding actions to newDefer
+							// tuple[1] = [ done | fail | progress ]
+							// 绑定 deferred [done | fail | progress] 方法
 							deferred[ tuple[1] ](function() {
+								// 当前的 this == deferred
 								var returned = fn && fn.apply( this, arguments );
+								// 如果回调返回的是一个 Deferred 实例
 								if ( returned && jQuery.isFunction( returned.promise ) ) {
+									// 则继续派发事件
 									returned.promise()
 										.done( newDefer.resolve )
 										.fail( newDefer.reject )
 										.progress( newDefer.notify );
+									// 如果回调返回的是不是一个 Deferred 实例，则被当做 args 由 XXXWith 派发出去	
 								} else {
 									newDefer[ action + "With" ]( this === promise ? newDefer.promise() : this, fn ? [ returned ] : arguments );
 								}
 							});
 						});
+						// 销毁变量，防止内存泄漏（退出前手工设置null避免闭包造成的内存占用）
 						fns = null;
 					}).promise();
 				},
