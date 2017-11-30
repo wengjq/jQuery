@@ -3732,7 +3732,10 @@ jQuery.extend({
 				},
 				// Get a promise for this deferred
 				// If obj is provided, the promise aspect is added to the object
+				// 如果 obj 存在，给 obj 拓展 then | done | fail | progress 等方法，也就是外层的 promise 对象所定义的 state 、always 、then 方法
 				promise: function( obj ) {
+					// 注意区分这里的 promise ，这里的 promise 指代的是外层的 promise 对象，而不是里层的 promise 方法
+					// 在这里的 promise 就相当于 this
 					return obj != null ? jQuery.extend( obj, promise ) : promise;
 				}
 			},
