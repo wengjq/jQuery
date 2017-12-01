@@ -3739,6 +3739,7 @@ jQuery.extend({
 					return obj != null ? jQuery.extend( obj, promise ) : promise;
 				}
 			},
+			// 最终生成的异步队列实例
 			deferred = {};
 
 		// Keep pipe for back-compat
