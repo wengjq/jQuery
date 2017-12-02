@@ -3743,6 +3743,7 @@ jQuery.extend({
 			deferred = {};
 
 		// Keep pipe for back-compat
+		// 兼容旧版
 		promise.pipe = promise.then;
 
 		// Add list-specific methods
