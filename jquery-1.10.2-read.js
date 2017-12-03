@@ -3747,28 +3747,54 @@ jQuery.extend({
 		promise.pipe = promise.then;
 
 		// Add list-specific methods
+		// 初始化三条 Callbacks 队列
+		// 对于 tuples 的 3 条数据集是分 2 部分处理的
+		// 1、将回调函数（ done | fail | progress ）存入函数
+		// 2、给 deferred 对象扩充6个方法 （resolve/reject/notify/resolveWith/rejectWith/notifyWith ）
+		// resolve/reject/notify 是 callbacks.fireWith ，执行回调函数
+		// resolveWith/rejectWith/notifyWith 是 callbacks.fireWith 队列方法引用
 		jQuery.each( tuples, function( i, tuple ) {
+			// list 为队列，jQuery.Callbacks() ,创建了一个 callback 对象
+			// stateString 为最后的状态
 			var list = tuple[ 2 ],
 				stateString = tuple[ 3 ];
 
 			// promise[ done | fail | progress ] = list.add
+			// tuple[1] == done | fail | progress
+			// 可以看到 done|fail|progress 其实就是 Callbacks 里边的 add 方法
 			promise[ tuple[1] ] = list.add;
 
 			// Handle state
+			// 成功或者失败
+			// 如果存在 deferred 最终状态，向 doneList,failList 中的 list 添加 3 个回调函数
 			if ( stateString ) {
 				list.add(function() {
 					// state = [ resolved | rejected ]
+					// 修改最终状态
 					state = stateString;
 
 				// [ reject_list | resolve_list ].disable; progress_list.lock
-				}, tuples[ i ^ 1 ][ 2 ].disable, tuples[ 2 ][ 2 ].lock );
+				// [ reject_list | resolve_list ].disable; progress_list.lock
+				// 这里用到了 disable ，即是禁用回调列表中的回调
+				// 禁用对立的那条队列
+				// 注意 0^1 = 1   1^1 = 0
+				// 即是成功的时候，把失败那条队列禁用
+				// 即是成功的时候，把成功那条队列禁用
+				}, tuples[ i ^ 1 ][ 2 ].disable, 
+				// 锁住当前队列状态
+				tuples[ 2 ][ 2 ].lock );
 			}
 
 			// deferred[ resolve | reject | notify ]
+			// tuple[0] == resolve | reject | notify
+			// 可以看到 resolve | reject | notify 其实就是 Callbacks 里边的 fire 方法
+			// 这里还有一点，deferred 对象是暴露了 resolve | reject | notify 三个方法的，而 deferred.promise() 只暴露 done, fail, always 这些个回调函数接口
+			// 之所以通常使用 deferred 是要返回 deferred.promise() ，一是因为 CommonJS promise/A 本来就应当是这样子的；二也是用来避免返回的对象能够主动地调用到 resolve 与 reject 这些关键性的方法
 			deferred[ tuple[0] ] = function() {
 				deferred[ tuple[0] + "With" ]( this === deferred ? promise : this, arguments );
 				return this;
 			};
+			// deferred[resolveWith | rejectWith | notifyWith] 调用的是 Callbacks 里的 fireWith 方法
 			deferred[ tuple[0] + "With" ] = list.fireWith;
 		});
 
