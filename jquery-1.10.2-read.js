@@ -3799,14 +3799,25 @@ jQuery.extend({
 		});
 
 		// Make the deferred a promise
+		// 这一步之前 promise 和 deferred 绑定了以下方法
+		// deferred[ resolve | reject | notify ]
+		// deferred[ resolveWith | rejectWith | notifyWith ]
+		// promise[ done | fail | progress | then | always | state | promise ]
+
+		// 合并内部辅助的 promise 的 promise 方法（jQ 同学坑爹，起同样名字）
+		// 扩展 deferred 的 then | done | fail | progress 等方法
 		promise.promise( deferred );
 
 		// Call given func if any
+		// $.Deferred(func)格式
+		// $.Deferred() 可以接受一个函数名（注意，是函数名）作为参数，$.Deferred() 所生成的 deferred 对象将作为这个函数的默认参数
+		// 并且把当前任务的上下文跟参数设置成当前生成的deferred实例
 		if ( func ) {
 			func.call( deferred, deferred );
 		}
 
 		// All done!
+		// 返回实例，显而易见 Deferred 是个工厂类，返回的是内部构建的 deferred 对象
 		return deferred;
 	},
 
