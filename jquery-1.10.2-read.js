@@ -3822,6 +3822,12 @@ jQuery.extend({
 	},
 
 	// Deferred helper
+	// $.when( deferreds ) 提供一种方法来执行一个或多个对象的回调函数
+	// 参数 deferreds 表示一个或多个延迟对象，或者普通的JavaScript对象
+	// 注意到 $.when 是多任务的，当一个任务失败的时候，代表整个都失败了，
+	// 即是 $.when(d1, d2).done(fnc) 如果 d1 或者 d2 其中一个失败了，代表整个都失败了，将不会执行fnc
+	// 任务是 Deferred 实例，称为异步任务
+	// 任务是普通 function 时，称为同步任务
 	when: function( subordinate /* , ..., subordinateN */ ) {
 		var i = 0,
 			resolveValues = core_slice.call( arguments ),
