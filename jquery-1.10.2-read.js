@@ -3834,6 +3834,7 @@ jQuery.extend({
 			length = resolveValues.length,
 
 			// the count of uncompleted subordinates
+			// 还没完成的异步任务数
 			remaining = length !== 1 || ( subordinate && jQuery.isFunction( subordinate.promise ) ) ? length : 0,
 
 			// the master Deferred. If resolveValues consist of only a single Deferred, just use that.
