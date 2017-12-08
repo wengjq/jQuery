@@ -3838,6 +3838,7 @@ jQuery.extend({
 			remaining = length !== 1 || ( subordinate && jQuery.isFunction( subordinate.promise ) ) ? length : 0,
 
 			// the master Deferred. If resolveValues consist of only a single Deferred, just use that.
+			// 如果任务对象参数列表 resolveValues 只有一个对象，那么 deferred 对象就是它，否则新建一个 deferred 对象
 			deferred = remaining === 1 ? subordinate : jQuery.Deferred(),
 
 			// Update function for both resolve and progress values
