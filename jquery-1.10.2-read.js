@@ -3390,6 +3390,8 @@ function createOptions( options ) {
 // memory -- 保持以前的值，将添加到这个列表的后面的最新的值立即执行调用任何回调 (像一个递延 Deferred)
 // unique -- 确保一次只能添加一个回调(所以在列表中没有重复的回调)
 // stopOnFalse -- 当一个回调返回 false 时中断调用
+
+// 像这种先调用获取到实例，然后通过实例进行一系列的操作，很明显利用了闭包特性。
 jQuery.Callbacks = function( options ) {
 
 	// Convert options from String-formatted to Object-formatted if needed
@@ -3509,6 +3511,10 @@ jQuery.Callbacks = function( options ) {
 								// Inspect recursively
 								// 递归调用自己，注意这个使用技巧
 								// 如果是数组，以这个数组为参数再递归调用这个立即执行函数本身
+								// 例如数组 [fn2]
+							 	// var callbacks = $.Callbacks();
+							 	// callbacks.add(fn1, [fn2]); 
+
 								add( arg );
 							}
 						});
