@@ -3848,13 +3848,19 @@ jQuery.extend({
 			deferred = remaining === 1 ? subordinate : jQuery.Deferred(),
 
 			// Update function for both resolve and progress values
+			// 用于更新 成功|处理 中两个状态，
+			// 这里不考虑失败的状态是因为，当一个任务失败的时候，代表整个都失败了。
 			updateFunc = function( i, contexts, values ) {
 				return function( value ) {
 					contexts[ i ] = this;
 					values[ i ] = arguments.length > 1 ? core_slice.call( arguments ) : value;
+					// 处理中，派发正在处理事件
 					if( values === progressValues ) {
 						deferred.notifyWith( contexts, values );
+						// 成功，并且最后剩余的异步任务为0了
 					} else if ( !( --remaining ) ) {
+						// 说明所有任务都成功了，派发成功事件出去
+						// 事件包含的上下文是当前任务前边的所有任务的一个集合
 						deferred.resolveWith( contexts, values );
 					}
 				};
