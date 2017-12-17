@@ -3869,6 +3869,8 @@ jQuery.extend({
 			progressValues, progressContexts, resolveContexts;
 
 		// add listeners to Deferred subordinates; treat others as resolved
+		// 如果只有一个任务，可以不用做维护状态的处理了
+		// 只有大于1个任务才需要维护任务的状态
 		if ( length > 1 ) {
 			progressValues = new Array( length );
 			progressContexts = new Array( length );
