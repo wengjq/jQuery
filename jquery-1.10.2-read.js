@@ -3888,10 +3888,13 @@ jQuery.extend({
 		}
 
 		// if we're not waiting on anything, resolve the master
+		// 传进来的任务都是同步任务
 		if ( !remaining ) {
 			deferred.resolveWith( resolveContexts, resolveValues );
 		}
-
+		
+		// 注意这里有一种情况是，
+		// 如果你不传递任何参数，jQuery.when() 将返回一个 resolved（解决）状态的 promise 对象
 		return deferred.promise();
 	}
 });
