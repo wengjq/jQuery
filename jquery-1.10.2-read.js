@@ -3898,16 +3898,19 @@ jQuery.extend({
 		return deferred.promise();
 	}
 });
+// jQuery.support 属性包含表示不同浏览器特性或漏洞的属性集
 jQuery.support = (function( support ) {
 
 	var all, a, input, select, fragment, opt, eventName, isSupported, i,
 		div = document.createElement("div");
 
 	// Setup
+	// 创建测试用例
 	div.setAttribute( "className", "t" );
 	div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>";
 
 	// Finish early in limited (non-browser) environments
+	// 在非浏览器环境提前结束
 	all = div.getElementsByTagName("*") || [];
 	a = div.getElementsByTagName("a")[ 0 ];
 	if ( !a || !a.style || !all.length ) {
@@ -3915,6 +3918,7 @@ jQuery.support = (function( support ) {
 	}
 
 	// First batch of tests
+	// 第一批次测试
 	select = document.createElement("select");
 	opt = select.appendChild( document.createElement("option") );
 	input = div.getElementsByTagName("input")[ 0 ];
@@ -3922,9 +3926,14 @@ jQuery.support = (function( support ) {
 	a.style.cssText = "top:1px;float:left;opacity:.5";
 
 	// Test setAttribute on camelCase class. If it works, we need attrFixes when doing get/setAttribute (ie6/7)
+	// 测试是否支持 setAttribute 方法
+	// setAttribute 方法需要传入驼峰表示法的参数
 	support.getSetAttribute = div.className !== "t";
 
 	// IE strips leading whitespace when .innerHTML is used
+	// 检查用 innerHTML 赋值时，是否会保留前面的空白符。 
+    // IE中为 false ， Firefox 中为 true 。 
+    // nodeType = 3 --- Text
 	support.leadingWhitespace = div.firstChild.nodeType === 3;
 
 	// Make sure that tbody elements aren't automatically inserted
