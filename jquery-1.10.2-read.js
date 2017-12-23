@@ -3726,7 +3726,7 @@ jQuery.extend({
 										.done( newDefer.resolve )
 										.fail( newDefer.reject )
 										.progress( newDefer.notify );
-									// 如果回调返回的是不是一个 Deferred 实例，则被当做 args 由 XXXWith 派发出去	
+									// 如果回调返回的不是一个 Deferred 实例，则被当做 args 由 XXXWith 派发出去	
 								} else {
 									newDefer[ action + "With" ]( this === promise ? newDefer.promise() : this, fn ? [ returned ] : arguments );
 								}
