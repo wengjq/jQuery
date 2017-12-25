@@ -3942,10 +3942,12 @@ jQuery.support = (function( support ) {
 
 	// Make sure that tbody elements aren't automatically inserted
 	// IE will insert them into empty tables
+	// 空 table，IE 会自动生成 tbody，而标准浏览器不会(标准浏览器如果有 tr 存在，也会自动生成 tbody )
 	support.tbody = !div.getElementsByTagName("tbody").length;
 
 	// Make sure that link elements get serialized correctly by innerHTML
 	// This requires a wrapper element in IE
+	// IE678 无法通过 div.innerHTML = '<link />';来插入 link
 	support.htmlSerialize = !!div.getElementsByTagName("link").length;
 
 	// Get the style information from getAttribute
