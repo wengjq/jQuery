@@ -3952,19 +3952,26 @@ jQuery.support = (function( support ) {
 
 	// Get the style information from getAttribute
 	// (IE uses .cssText instead)
+	// IE67 无法用 getAttribute 获取 style ，返回 object ，
+	// 同理也无法用 setAttribute 设置 styles
 	support.style = /top/.test( a.getAttribute("style") );
 
 	// Make sure that URLs aren't manipulated
 	// (IE normalizes it by default)
+	// 检查链接的 “href” 属性能否被正常地序列化。 
 	support.hrefNormalized = a.getAttribute("href") === "/a";
 
 	// Make sure that element opacity exists
 	// (IE uses filter instead)
 	// Use a regex to work around a WebKit issue. See #5145
+	// 检查 css 样式中的透明度设置能够被有效支持
+	// IE678 是通过 filter 滤镜来支持透明度
 	support.opacity = /^0.5/.test( a.style.opacity );
 
 	// Verify style float existence
 	// (IE uses styleFloat instead of cssFloat)
+	// 检查 css 样式中的 float 属性能够被有效支持
+	// IE678 通过 styleFloat 来获取 float，而标准浏览器用 cssFloat
 	support.cssFloat = !!a.style.cssFloat;
 
 	// Check the default checkbox/radio value ("" on WebKit; "on" elsewhere)
