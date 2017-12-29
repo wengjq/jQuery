@@ -3975,17 +3975,23 @@ jQuery.support = (function( support ) {
 	support.cssFloat = !!a.style.cssFloat;
 
 	// Check the default checkbox/radio value ("" on WebKit; "on" elsewhere)
+	// 检查 chebox 的 value 是否为 “on”
 	support.checkOn = !!input.value;
 
 	// Make sure that a selected-by-default option has a working selected property.
 	// (WebKit defaults to false instead of true, IE too, if it's in an optgroup)
+	// 检查 select 中的第一个 option 能否被默认选中。
+	// IE 中，第一个 option 默认不被选中，包括 IE9 依然如此，其他则选中
 	support.optSelected = opt.selected;
 
 	// Tests for enctype support on a form (#6743)
+	// 测试 form 是否支持 enctype
+	// enctype 属性规定在发送到服务器之前应该如何对表单数据进行编码
 	support.enctype = !!document.createElement("form").enctype;
 
 	// Makes sure cloning an html5 element does not cause problems
 	// Where outerHTML is undefined, this still works
+	// IE6 在克隆 HTML5 的新标签元素时 outerHTML 有":"
 	support.html5Clone = document.createElement("nav").cloneNode( true ).outerHTML !== "<:nav></:nav>";
 
 	// Will be defined later
