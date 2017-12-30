@@ -3995,6 +3995,7 @@ jQuery.support = (function( support ) {
 	support.html5Clone = document.createElement("nav").cloneNode( true ).outerHTML !== "<:nav></:nav>";
 
 	// Will be defined later
+	// 初始化定义，下面进行测试及修改
 	support.inlineBlockNeedsLayout = false;
 	support.shrinkWrapBlocks = false;
 	support.pixelPosition = false;
