@@ -4096,16 +4096,18 @@ jQuery.support = (function( support ) {
 	support.ownLast = i !== "0";
 
 	// Run tests that need a body at doc ready
+	// 运行测试，and 需要 doc ready 环境
 	jQuery(function() {
 		var container, marginDiv, tds,
 			divReset = "padding:0;margin:0;border:0;display:block;box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;",
 			body = document.getElementsByTagName("body")[0];
 
+		// 不存在 body 标签直接返回	
 		if ( !body ) {
 			// Return for frameset docs that don't have a body
 			return;
 		}
-
+		// 创建测试用例
 		container = document.createElement("div");
 		container.style.cssText = "border:0;width:0;height:0;position:absolute;top:0;left:-9999px;margin-top:1px";
 
