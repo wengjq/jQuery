@@ -4130,15 +4130,21 @@ jQuery.support = (function( support ) {
 
 		// Support: IE8
 		// Check if empty table cells still have offsetWidth/Height
+		// 空 table 是否仍然存在 offsetWidth/Height （IE8）
 		support.reliableHiddenOffsets = isSupported && ( tds[ 0 ].offsetHeight === 0 );
 
 		// Check box-sizing and margin behavior.
+		// 注意这里设置了一些样式 box-sizing:border-box;padding:1px;border:1px;display:block;width:4px;
+		// border-box -- 这是IE 怪异模式（Quirks mode）使用的 盒模型。
+		// width 与 height 包括内边距（padding）与边框（border），不包括外边距（margin）
+		// width = border + padding + 内容的宽度，height = border + padding + 内容的高度
 		div.innerHTML = "";
 		div.style.cssText = "box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;padding:1px;border:1px;display:block;width:4px;margin-top:1%;position:absolute;top:1%;";
 
 		// Workaround failing boxSizing test due to offsetWidth returning wrong value
 		// with some non-1 values of body zoom, ticket #13543
 		jQuery.swap( body, body.style.zoom != null ? { zoom: 1 } : {}, function() {
+			// 当 offsetWidth 为 4 ，说明不包括内边距（padding）与边框（border），不支持 boxSizing
 			support.boxSizing = div.offsetWidth === 4;
 		});
 
