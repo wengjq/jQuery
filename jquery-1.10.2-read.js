@@ -4149,7 +4149,10 @@ jQuery.support = (function( support ) {
 		});
 
 		// Use window.getComputedStyle because jsdom on node.js will break without it.
+		// window.getComputedStyle -- 方法得出所有在应用有效的样式和分解任何可能会包含值的基础计算后的元素的CSS属性值
+		// jQuery 的 CSS() 方法，其底层运作就应用了 getComputedStyle 以及 getPropertyValue 方法
 		if ( window.getComputedStyle ) {
+			// safari 下返回 1%，因此等于 false ，而其他浏览器会转换成相应的像素值
 			support.pixelPosition = ( window.getComputedStyle( div, null ) || {} ).top !== "1%";
 			support.boxSizingReliable = ( window.getComputedStyle( div, null ) || { width: "4px" } ).width === "4px";
 
@@ -4162,6 +4165,9 @@ jQuery.support = (function( support ) {
 			marginDiv.style.marginRight = marginDiv.style.width = "0";
 			div.style.width = "1px";
 
+			// 检查 Margin Right 的计算是否可靠。 各浏览器中都为 true
+			// 上面注释中提到某些老版本的 Webkit 内核的浏览器中为 false
+			// 简单地说，就是将 width 和 marginRight 设为 0 时，获取的 marginRignt 应为 0
 			support.reliableMarginRight =
 				!parseFloat( ( window.getComputedStyle( marginDiv, null ) || {} ).marginRight );
 		}
