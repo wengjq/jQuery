@@ -4179,6 +4179,10 @@ jQuery.support = (function( support ) {
 			// them layout
 			div.innerHTML = "";
 			div.style.cssText = divReset + "width:1px;padding:1px;display:inline;zoom:1";
+
+			// inlineBlockNeedsLayout 表示将原本 display 为 block 的 DOM Element 设置为 disylay: inline 时
+			// 是否与 inline 形式的 DOM Element 一致（ offsetWidth 为 2 ）
+			// IE8 及之前的浏览器中为 true ， FireFox 中为 false
 			support.inlineBlockNeedsLayout = ( div.offsetWidth === 3 );
 
 			// Support: IE6
@@ -4186,6 +4190,9 @@ jQuery.support = (function( support ) {
 			div.style.display = "block";
 			div.innerHTML = "<div></div>";
 			div.firstChild.style.width = "5px";
+
+			// shrinkWrapBlocks 表示内部 DOM Element 的样式是否会影响外部 DOM Element 的样式
+			// IE 6 中为 true ， 多数浏览器中为 false
 			support.shrinkWrapBlocks = ( div.offsetWidth !== 3 );
 
 			if ( support.inlineBlockNeedsLayout ) {
@@ -4195,16 +4202,19 @@ jQuery.support = (function( support ) {
 				body.style.zoom = 1;
 			}
 		}
-
+		// 销毁测试用例
 		body.removeChild( container );
 
 		// Null elements to avoid leaks in IE
+		// 在 $(function(){})闭包内部，释放内存，防止内存泄漏
 		container = div = tds = marginDiv = null;
 	});
 
 	// Null elements to avoid leaks in IE
+	// 释放内存，防止内存泄漏
 	all = select = fragment = opt = a = input = null;
 
+	// 返回 support 对象
 	return support;
 })({});
 
