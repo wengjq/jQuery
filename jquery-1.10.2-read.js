@@ -4218,7 +4218,13 @@ jQuery.support = (function( support ) {
 	return support;
 })({});
 
+// 下面一块是数据的存储
+// $.data() , $().data()
+// $.removeData() , $().removeData() 等
+
+// 匹配 {任意字符*} 或者 [任意字符*]
 var rbrace = /(?:\{[\s\S]*\}|\[[\s\S]*\])$/,
+	// 匹配大写字母
 	rmultiDash = /([A-Z])/g;
 
 function internalData( elem, name, data, pvt /* Internal Use Only */ ){
