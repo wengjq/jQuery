@@ -4227,6 +4227,7 @@ var rbrace = /(?:\{[\s\S]*\}|\[[\s\S]*\])$/,
 	// 匹配大写字母
 	rmultiDash = /([A-Z])/g;
 
+// 数据存取方法	（pvt 表示此方法仅在内部使用）
 function internalData( elem, name, data, pvt /* Internal Use Only */ ){
 	if ( !jQuery.acceptData( elem ) ) {
 		return;
