@@ -4229,11 +4229,17 @@ var rbrace = /(?:\{[\s\S]*\}|\[[\s\S]*\])$/,
 
 // 数据存取方法	（pvt 表示此方法仅在内部使用）
 function internalData( elem, name, data, pvt /* Internal Use Only */ ){
+	// 检查 elem 元素是否可以设置数据
 	if ( !jQuery.acceptData( elem ) ) {
+		// 如果参数 elem 不支持设置数据，则立即返回
 		return;
 	}
 
 	var ret, thisCache,
+		// 产生jQuery键值随机数 类似于： "11020056177454302087426"
+		// jQuery.expando = (core_version + Math.random()).replace(/\D/g, "");
+		// (core_version + Math.random()) 产生一串随机字符串 "1.10.20.6013481540139765"
+		// replace(/\D/g, "") 去掉非数字
 		internalKey = jQuery.expando,
 
 		// We have to handle DOM nodes and JS objects differently because IE6-7
