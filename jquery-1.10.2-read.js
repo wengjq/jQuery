@@ -4244,15 +4244,23 @@ function internalData( elem, name, data, pvt /* Internal Use Only */ ){
 
 		// We have to handle DOM nodes and JS objects differently because IE6-7
 		// can't GC object references properly across the DOM-JS boundary
+		// 元素的 nodeType
 		isNode = elem.nodeType,
 
 		// Only DOM nodes need the global jQuery cache; JS object data is
 		// attached directly to the object so GC can occur automatically
+		// 只有 DOM 元素需要全局的 jQuery 缓存 cache，
+		// 而如果是 JS 对象，则直接将数据保存在这个对象上
 		cache = isNode ? jQuery.cache : elem,
 
 		// Only defining an ID for JS objects if its cache already exists allows
 		// the code to shortcut on the same path as a DOM node with no cache
+		// 添加的对象的 key 值，根据元素 elem 的 nodeType 判断
+		// 如果是 Dom 元素，为 elem[internalKey]
+		// 如果是 JS 对象，elem[internalKey] 存在则使用 internalKey ，反之，为 elem[internalKey]
 		id = isNode ? elem[ internalKey ] : elem[ internalKey ] && internalKey;
+		// 可以看到，上面的 cache 和 id 都是要根据 elem 的类型去判断
+		// 而 internalData 方法，是适用于对 DOM（doc.getElementById类型）元素 和 JS（var obj={}）对象的
 
 	// Avoid doing any more work than we need to when trying to get data on an
 	// object that has no data at all
