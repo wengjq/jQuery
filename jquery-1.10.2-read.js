@@ -4268,20 +4268,28 @@ function internalData( elem, name, data, pvt /* Internal Use Only */ ){
 	if ( (!id || !cache[id] || (!pvt && !cache[id].data)) && data === undefined && typeof name === "string" ) {
 		return;
 	}
-
+	// 如果 id 不存在的时候
 	if ( !id ) {
 		// Only DOM nodes need a new unique ID for each element since their data
 		// ends up in the global cache
+		// 只有当 elem 是 DOM 结点的时候，需要添加一个唯一的 ID
 		if ( isNode ) {
+			// jQuery.guid 全局计数器
+			// 对于 DOM 结点，jQuery.uuid 会自加 1，并附加到 DOM 元素上
 			id = elem[ internalKey ] = core_deletedIds.pop() || jQuery.guid++;
 		} else {
+			// 不是 DOM 结点，是 JS 对象的话直接使用 internalKey
 			id = internalKey;
 		}
 	}
-
+	// 如果 cache[id] 不存在
 	if ( !cache[ id ] ) {
 		// Avoid exposing jQuery metadata on plain JS objects when the object
 		// is serialized using JSON.stringify
+		// is serialized using JSON.stringify
+		// 对于 DOM 如果数据缓存对象不存在，则初始化为空对象 {}
+		// 对于 JS 对象，设置方法 toJSON 为空函数，以避免在执行 JSON.stringify() 时暴露缓存数据
+		// 如果一个对象定义了方法 toJSON(), JSON.stringify() 在序列化该对象时会调用这个方法来生成该对象的 JSON 元素
 		cache[ id ] = isNode ? {} : { toJSON: jQuery.noop };
 	}
 
