@@ -4295,10 +4295,14 @@ function internalData( elem, name, data, pvt /* Internal Use Only */ ){
 
 	// An object can be passed to jQuery.data instead of a key/value pair; this gets
 	// shallow copied over onto the existing cache
+	// 如果参数 name 是对象或函数，则批量设置数据
 	if ( typeof name === "object" || typeof name === "function" ) {
+		// pvt 表示方法使用于内部
 		if ( pvt ) {
+			// 对于内部数据，把参数 name 中的属性合并到 cache[id] 中
 			cache[ id ] = jQuery.extend( cache[ id ], name );
 		} else {
+			// 对于自定义数据，把参数 name 中的属性合并到 cache[id].data 中
 			cache[ id ].data = jQuery.extend( cache[ id ].data, name );
 		}
 	}
