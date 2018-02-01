@@ -4306,12 +4306,17 @@ function internalData( elem, name, data, pvt /* Internal Use Only */ ){
 			cache[ id ].data = jQuery.extend( cache[ id ].data, name );
 		}
 	}
-
+	// 这是缓存后的数据
 	thisCache = cache[ id ];
 
 	// jQuery data() is stored in a separate object inside the object's internal data
 	// cache in order to avoid key collisions between internal data and user-defined
 	// data.
+	// jQuery 库会使用 jQuery.data 方法存储一些内部使用的数据，比如 queue 队列，on 事件绑定等等，这些方法都需要存储空间来存储数据
+	// 为了区分内部使用的数据和用户定义的数据，jQuery 将内部使用的数据直接存储在 cache[id] 里面，而用户定义的数据则存储在 cache[id].data 中
+	// 如果是自定义数据 则将 thisCache 变量指向到 .data 对象中,如果为空则创建一个空对象
+	// 这里是个重点，很简单的代码，这里改变了将数据存储的位置
+	// 而且这里存储的位置影响到后文 internalRemoveData remove 的位置
 	if ( !pvt ) {
 		if ( !thisCache.data ) {
 			thisCache.data = {};
@@ -4319,28 +4324,33 @@ function internalData( elem, name, data, pvt /* Internal Use Only */ ){
 
 		thisCache = thisCache.data;
 	}
-
+	// 如果 data 不为空，设置键值对 key - value
 	if ( data !== undefined ) {
 		thisCache[ jQuery.camelCase( name ) ] = data;
 	}
 
 	// Check for both converted-to-camel and non-converted data property names
 	// If a data property was specified
+	// 如果参数 name 是 "string" 类型，则读取单个数据
+	// 就是获取返回值了 internalData(elem,'key')
 	if ( typeof name === "string" ) {
 
 		// First Try to find as-is property data
+		// 先尝试读取参数 name 对应的数据
 		ret = thisCache[ name ];
 
 		// Test for null|undefined property data
+		// 如果未取到，则把参数 name 转换为驼峰式再次尝试读取对应的数据
 		if ( ret == null ) {
 
 			// Try to find the camelCased property
+			// 如果未传入参数 name , data ,则返回数据缓存对象
 			ret = thisCache[ jQuery.camelCase( name ) ];
 		}
 	} else {
 		ret = thisCache;
 	}
-
+	// 返回 ret 对象
 	return ret;
 }
 
