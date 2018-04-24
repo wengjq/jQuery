@@ -4353,8 +4353,9 @@ function internalData( elem, name, data, pvt /* Internal Use Only */ ){
 	// 返回 ret 对象
 	return ret;
 }
-
+// 数据对象的移除
 function internalRemoveData( elem, name, pvt ) {
+	// 检查 elem 元素是否可以设置数据
 	if ( !jQuery.acceptData( elem ) ) {
 		return;
 	}
@@ -4371,29 +4372,35 @@ function internalRemoveData( elem, name, pvt ) {
 	if ( !cache[ id ] ) {
 		return;
 	}
-
+	// 有数据存在
 	if ( name ) {
-
+		// 缓存的位置，指向私有对象还是指向用户自定义的 data
 		thisCache = pvt ? cache[ id ] : cache[ id ].data;
-
+		// 有数据
 		if ( thisCache ) {
 
 			// Support array or space separated string names for data keys
 			if ( !jQuery.isArray( name ) ) {
 
 				// try the string as a key before any manipulation
+				// 不是数组的话 则单独进行匹配删除
 				if ( name in thisCache ) {
 					name = [ name ];
 				} else {
 
 					// split the camel cased version by spaces unless a key with the spaces exists
+					// 进行一次驼峰命名转换
 					name = jQuery.camelCase( name );
+					// 如果进行了驼峰命名转换的 name 存在于 thisCache中
 					if ( name in thisCache ) {
+						// 转化为数组形式
 						name = [ name ];
 					} else {
+						// 没找到，使用空格分隔 name，也是转化为数组形式
 						name = name.split(" ");
 					}
 				}
+				// 如果是数组
 			} else {
 				// If "name" is an array of keys...
 				// When data is initially created, via ("key", "val") signature,
@@ -4403,7 +4410,10 @@ function internalRemoveData( elem, name, pvt ) {
 				// This will only penalize the array argument path.
 				name = name.concat( jQuery.map( name, jQuery.camelCase ) );
 			}
-
+			// 经过上面的处理我们看到 jQ 兼容了很多形式上的参数
+			// [key1,key2] "key1 key2" "key1" "key1-name"
+			// 上边的一顿整理，到了这里都是一个数组，执行删除操作
+			// 遍历删除
 			i = name.length;
 			while ( i-- ) {
 				delete thisCache[ name[i] ];
@@ -4411,6 +4421,9 @@ function internalRemoveData( elem, name, pvt ) {
 
 			// If there is no data left in the cache, we want to continue
 			// and let the cache object itself get destroyed
+			// isEmptyDataObject 检测的是 JS 数据对象是否为空
+			// isEmptyObject 检测一个普通对象是否是空对象
+			// 如果数据对象中还有剩余数据则函数执行完毕，return 返回
 			if ( pvt ? !isEmptyDataObject(thisCache) : !jQuery.isEmptyObject(thisCache) ) {
 				return;
 			}
@@ -4418,17 +4431,27 @@ function internalRemoveData( elem, name, pvt ) {
 	}
 
 	// See jQuery.data for more information
+	// 代码执行到这里的时候有两种情况：
+	// 1.没有传name参数，意味着要删除所有数据
+	// 2.按照传递的name参数删除后,没有数据了
+	// 如果是来删除自定义的数据
 	if ( !pvt ) {
 		delete cache[ id ].data;
 
 		// Don't destroy the parent cache unless the internal data object
 		// had been the only thing left in it
+		// 删除后检测到数据缓存对象还有剩余数据则返回
 		if ( !isEmptyDataObject( cache[ id ] ) ) {
 			return;
 		}
 	}
 
 	// Destroy the cache
+	// 代码执行到这里时：
+	// 1.删除的是系统级别数据,
+	// 2.已经清空完了用户的缓存数据,而且数据缓存对象还不是空的时候
+	// 销毁缓存
+	// 该对象是dom元素
 	if ( isNode ) {
 		jQuery.cleanData( [ elem ], true );
 
