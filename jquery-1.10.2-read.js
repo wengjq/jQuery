@@ -4468,26 +4468,30 @@ function internalRemoveData( elem, name, pvt ) {
 }
 
 jQuery.extend({
+	// 全局的缓存对象
 	cache: {},
 
 	// The following elements throw uncatchable exceptions if you
 	// attempt to add expando properties to them.
+	// 如果你尝试给以下元素添加扩展属性,将抛出“无法捕捉”的异常
+	// 这里声明的几个元素对象是不给于数据绑定的
+	// applet、embed 和 object 元素是不支持设置 expando 属性的，所以不支持 data 方法
 	noData: {
 		"applet": true,
 		"embed": true,
 		// Ban all objects except for Flash (which handle expandos)
 		"object": "clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
 	},
-
+	// 检查对象是否已经存储了数据
 	hasData: function( elem ) {
 		elem = elem.nodeType ? jQuery.cache[ elem[jQuery.expando] ] : elem[ jQuery.expando ];
 		return !!elem && !isEmptyDataObject( elem );
 	},
-
+	// 给 elem（可是DOM，可以是JS对象）添加 key-value 为 name-data 的数据
 	data: function( elem, name, data ) {
 		return internalData( elem, name, data );
 	},
-
+	// 移除 elem（可是DOM，可以是JS对象）上
 	removeData: function( elem, name ) {
 		return internalRemoveData( elem, name );
 	},
