@@ -4497,17 +4497,22 @@ jQuery.extend({
 	},
 
 	// For internal use only.
+	// 添加或读取一个仅供内部使用的数据
 	_data: function( elem, name, data ) {
 		return internalData( elem, name, data, true );
 	},
-
+	// 删除内部使用的数据
 	_removeData: function( elem, name ) {
 		return internalRemoveData( elem, name, true );
 	},
 
 	// A method for determining if a DOM node can handle the data expando
+	// 检测 DOM 节点是否可以绑定数据
+	// nodeType = 1 -- Element
+	// nodeType = 9 -- Document
 	acceptData: function( elem ) {
 		// Do not set data on non-element because it will not be cleared (#8335).
+		// 不要在非元素上设置数据，因为它不会被清除
 		if ( elem.nodeType && elem.nodeType !== 1 && elem.nodeType !== 9 ) {
 			return false;
 		}
